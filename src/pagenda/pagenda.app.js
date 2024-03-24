@@ -10,7 +10,7 @@
     location,
     color:int,
     calName,
-    allDay: bool,
+    allday: bool,
   }
 */
 
@@ -47,11 +47,11 @@ function formatDay(date) {
     }
 }
 
-function formatDateShort(startDate, durationInSeconds, allDay) {
+function formatDateShort(startDate, durationInSeconds, allday) {
     // Hard-coded no meridian
     const endDate = new Date(startDate.getTime());
     endDate.setSeconds(startDate.getSeconds() + Number(durationInSeconds));
-    return formatDay(startDate) + (allDay ? "" : Locale.time(startDate, 1) + ">" + Locale.time(endDate, 1));
+    return formatDay(startDate) + (allday ? "" : Locale.time(startDate, 1) + ">" + Locale.time(endDate, 1));
 }
 
 function showList() {
@@ -72,7 +72,7 @@ function showList() {
             if (!ev) return;
             const isPast = false;
             const x = r.x + 2, title = ev.title;
-            const body = formatDateShort(getDate(ev.timestamp), ev.durationInSeconds, ev.allDay);
+            const body = formatDateShort(getDate(ev.timestamp), ev.durationInSeconds, ev.allday);
             if (title){
                 g.setFontAlign(-1, -1).setFont(fontBig).setColor(g.theme.fg).drawString(title, x + 4, r.y + 2);
             }
