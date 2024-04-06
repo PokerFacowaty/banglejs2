@@ -59,8 +59,8 @@ function drawFieldAndPaddles() {
     SCREEN_SIZE,
     SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2)
   );
-  L_PADDLE_TOP = (SCREEN_SIZE - PADDLE_HEIGHT) / 2;
-  L_PADDLE_BOTTOM = SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2);
+  R_PADDLE_TOP = (SCREEN_SIZE - PADDLE_HEIGHT) / 2;
+  R_PADDLE_BOTTOM = SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2);
 
   // An attempt at a dashed middle line
   // TODO: these have to be redrawn if the ball is on them and is being removed
@@ -160,20 +160,28 @@ function moveBall(ball){
 
   switch (ball.direction){
     case 0:
-      ball.x -= ball.speed;
-      ball.y -= ball.speed;
+      // ball.x -= ball.speed;
+      // ball.y -= ball.speed;
+      ball.x--;
+      ball.y--;
       break;
     case 1:
-      ball.x += ball.speed;
-      ball.y -= ball.speed;
+      // ball.x += ball.speed;
+      // ball.y -= ball.speed;
+      ball.x++;
+      ball.y--;
       break;
     case 2:
-      ball.x += ball.speed;
-      ball.y += ball.speed;
+      // ball.x += ball.speed;
+      // ball.y += ball.speed;
+      ball.x++;
+      ball.y++;
       break;
     case 3:
-      ball.x -= ball.speed;
-      ball.y += ball.speed;
+      // ball.x -= ball.speed;
+      // ball.y += ball.speed;
+      ball.x--;
+      ball.y++;
       break;
   }
   return ball;
@@ -207,27 +215,37 @@ function didScore(ball){
 }
 
 function isAboutToHitWall(ball){
+  // TODO: make it a switch case probably
   // let's start with screen edges
   if ((ball.direction === 0 || ball.direction === 1) &&
-      (ball.y - BALL_SPEED) <= 0) {
+      ball.y <= 0) {
     // top edge of the screen
     return [true, "TOP"];
   }
 
   if ((ball.direction === 2 || ball.direction === 3) &&
-      (ball.y + BALL_SIZE + BALL_SPEED) >= SCREEN_SIZE) {
+      ball.y + 1 >= SCREEN_SIZE - 1) {
       // bottom edge of the screen
       return [true, "BOT"];
   }
 
   if ((ball.direction === 0 || ball.direction === 3) &&
-      ((ball.x - BALL_SPEED) <= 0 + PADDLE_WIDTH) &&
+      (ball.x === (0 + PADDLE_WIDTH)) &&
       (ball.y + BALL_SIZE) >= L_PADDLE_TOP &&
       (ball.y <= L_PADDLE_BOTTOM)) {
+        // left paddle
         return [true, "LP"];
   }
 
-  else return [false, ""];
+  if ((ball.direction === 1 || ball.direction === 2) &&
+      (ball.x + BALL_SIZE === (SCREEN_SIZE - 1 - PADDLE_WIDTH)) &&
+      (ball.y + BALL_SIZE) >= R_PADDLE_TOP &&
+      (ball.y <= R_PADDLE_BOTTOM)) {
+        // right paddle
+        return [true, "RP"];
+  }
+
+  return [false, ""];
 }
 
 g.clear();
@@ -246,6 +264,7 @@ const moveInterval = setInterval(() => {
     clearInterval(moveInterval);
   }
 
+  ball = moveBall(ball);
   const scored = didScore(ball);
   if (scored){
     // addPoints();
@@ -257,14 +276,11 @@ const moveInterval = setInterval(() => {
     return;
   }
 
+
   if (moves % REFRESH_RATE === 0) {
     deleteBallFromScreen(oldBall);
-    ball = moveBall(ball);
     oldBall = Object.assign({}, ball);
     redrawBall(ball);
-  }
-  else {
-    ball = moveBall(ball);
   }
 
   moves++;
