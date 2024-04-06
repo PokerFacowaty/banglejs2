@@ -33,6 +33,11 @@ const START_BOX_BOTTOM_RIGHT = new Uint8Array([
   SCREEN_SIZE
 ]);
 
+let L_PADDLE_TOP;
+let L_PADDLE_BOTTOM;
+let R_PADDLE_TOP;
+let R_PADDLE_BOTTOM;
+
 function drawFieldAndPaddles() {
   g.clear();
   g.drawRect.apply(this, CLOCK_BOX);
@@ -44,6 +49,9 @@ function drawFieldAndPaddles() {
     PADDLE_WIDTH,
     SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2)
   );
+  L_PADDLE_TOP = (SCREEN_SIZE / PADDLE_HEIGHT) / 2;
+  L_PADDLE_BOTTOM = SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2);
+
   // Right paddle
   g.fillRect(
     SCREEN_SIZE - PADDLE_WIDTH,
@@ -51,6 +59,8 @@ function drawFieldAndPaddles() {
     SCREEN_SIZE,
     SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2)
   );
+  L_PADDLE_TOP = (SCREEN_SIZE - PADDLE_HEIGHT) / 2;
+  L_PADDLE_BOTTOM = SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2);
 
   // An attempt at a dashed middle line
   // TODO: these have to be redrawn if the ball is on them and is being removed
@@ -176,6 +186,9 @@ function reflectDir(direction, onWhich){
   if (onWhich === "TOP" || onWhich === "BOT"){
     return hLineOpposites[direction];
   }
+  if (onWhich === "LP" || onWhich === "RP") {
+    return vLineOpposites[direction];
+  }
 
   // TODO: add vertical variations
 
@@ -205,6 +218,13 @@ function isAboutToHitWall(ball){
       (ball.y + BALL_SIZE + BALL_SPEED) >= SCREEN_SIZE) {
       // bottom edge of the screen
       return [true, "BOT"];
+  }
+
+  if ((ball.direction === 0 || ball.direction === 3) &&
+      ((ball.x - BALL_SPEED) <= 0 + PADDLE_WIDTH) &&
+      (ball.y + BALL_SIZE) >= L_PADDLE_TOP &&
+      (ball.y <= L_PADDLE_BOTTOM)) {
+        return [true, "LP"];
   }
 
   else return [false, ""];
