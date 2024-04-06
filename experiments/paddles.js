@@ -139,6 +139,7 @@ function redrawBall(ball){
 }
 
 function moveBall(ball){
+  // remeber that y is the opposite than you think, bigger y - LOWER on screen
   const edging = isAboutToHitWall(ball);
   const onEdge = edging[0];
   const onWhich = edging[1];
@@ -150,19 +151,19 @@ function moveBall(ball){
   switch (ball.direction){
     case 0:
       ball.x -= ball.speed;
-      ball.y += ball.speed;
+      ball.y -= ball.speed;
       break;
     case 1:
       ball.x += ball.speed;
-      ball.y += ball.speed;
+      ball.y -= ball.speed;
       break;
     case 2:
       ball.x += ball.speed;
-      ball.y -= ball.speed;
+      ball.y += ball.speed;
       break;
     case 3:
       ball.x -= ball.speed;
-      ball.y -= ball.speed;
+      ball.y += ball.speed;
       break;
   }
   return ball;
@@ -194,14 +195,18 @@ function didScore(ball){
 
 function isAboutToHitWall(ball){
   // let's start with screen edges
-  if (ball.y === 0 && ball.direction === 0 || ball.direction === 1) {
+  if ((ball.direction === 0 || ball.direction === 1) &&
+      (ball.y - BALL_SPEED) <= 0) {
     // top edge of the screen
     return [true, "TOP"];
-  } else if (ball.y + ball.size === SCREEN_SIZE && ball.direction === 2 ||
-    ball.direction === 3) {
+  }
+
+  if ((ball.direction === 2 || ball.direction === 3) &&
+      (ball.y + BALL_SIZE + BALL_SPEED) >= SCREEN_SIZE) {
       // bottom edge of the screen
       return [true, "BOT"];
   }
+
   else return [false, ""];
 }
 
