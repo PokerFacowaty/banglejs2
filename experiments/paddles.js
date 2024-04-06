@@ -90,7 +90,7 @@ function createBall(ballSize, side) {
 
   // direction is 0 to 3 starting at northwest and going clockwise
   const belowClock = Boolean(Math.round(Math.random()));
-  
+
   let x, y, direction;
 
   if (side === 0){
@@ -115,7 +115,7 @@ function createBall(ballSize, side) {
   else {
     y = getRandomWithBounds(0, CLOCK_BOX[1]);
   }
-  
+
   const speed = BALL_SPEED;
 
   return {x, y, size: ballSize, speed, direction};
@@ -175,7 +175,7 @@ function reflectDir(direction, onWhich){
   if (onWhich === "TOP" || onWhich === "BOT"){
     return hLineOpposites[direction];
   }
-  
+
   // TODO: add vertical variations
 
 }
@@ -188,7 +188,7 @@ function didScore(ball){
   if ((ball.x + ball.size) >= SCREEN_SIZE && (ball.direction === 1 || ball.direction === 2)) {
     return 1;
   }
-  
+
   return 0;
 }
 
