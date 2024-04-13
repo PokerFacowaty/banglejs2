@@ -4,7 +4,7 @@ const PADDLE_WIDTH = 5;
 const CLOCK_BOX = new Uint8Array([25, 50, SCREEN_SIZE - 25, SCREEN_SIZE - 50]); // x1, y1, x2, y2
 const REFRESH_RATE = 1; // 1 - redraw everytime anything moves, 5 - every 5 moves etc
 const BALL_SIZE = 6; // even
-const BALL_SPEED = 10; // in pixels per second
+const BALL_SPEED = 50; // in pixels per second
 const DEBUG_COLOR = '#ff0000';
 // The width of the "box" the ball will appear in after scoring
 const START_BOX_W = 50;
@@ -33,34 +33,16 @@ const START_BOX_BOTTOM_RIGHT = new Uint8Array([
   SCREEN_SIZE
 ]);
 
-let L_PADDLE_TOP;
-let L_PADDLE_BOTTOM;
-let R_PADDLE_TOP;
-let R_PADDLE_BOTTOM;
+let L_PADDLE_TOP = (SCREEN_SIZE / PADDLE_HEIGHT) / 2;
+let L_PADDLE_BOTTOM = SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2);
+let R_PADDLE_TOP = (SCREEN_SIZE - PADDLE_HEIGHT) / 2;
+let R_PADDLE_BOTTOM = SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2);
 
-function drawFieldAndPaddles() {
-  g.clear();
+let ball;
+let paddles;
+
+function drawField() {
   g.drawRect.apply(this, CLOCK_BOX);
-
-  // Left paddle
-  g.fillRect(
-    0,
-    (SCREEN_SIZE - PADDLE_HEIGHT) / 2,
-    PADDLE_WIDTH,
-    SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2)
-  );
-  L_PADDLE_TOP = (SCREEN_SIZE / PADDLE_HEIGHT) / 2;
-  L_PADDLE_BOTTOM = SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2);
-
-  // Right paddle
-  g.fillRect(
-    SCREEN_SIZE - PADDLE_WIDTH,
-    (SCREEN_SIZE - PADDLE_HEIGHT) / 2,
-    SCREEN_SIZE,
-    SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2)
-  );
-  R_PADDLE_TOP = (SCREEN_SIZE - PADDLE_HEIGHT) / 2;
-  R_PADDLE_BOTTOM = SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2);
 
   // An attempt at a dashed middle line
   // TODO: these have to be redrawn if the ball is on them and is being removed
@@ -82,7 +64,7 @@ function drawFieldAndPaddles() {
       i - 5
     );
   }
-  g.flip();
+  // g.flip();
 }
 
 function _drawFieldBorder() {
@@ -126,9 +108,52 @@ function createBall(ballSize, side) {
     y = getRandomWithBounds(0, CLOCK_BOX[1]);
   }
 
-  const speed = BALL_SPEED;
+  return {x, y, size: ballSize, direction};
+}
 
-  return {x, y, size: ballSize, speed, direction};
+function createPaddles() {
+  // Left paddle
+  const left = new Uint8Array([0, (SCREEN_SIZE - PADDLE_HEIGHT) / 2, PADDLE_WIDTH, SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2)]);
+  // g.fillRect.apply(this, left);
+
+  // Right paddle
+  const right = new Uint8Array([SCREEN_SIZE - PADDLE_WIDTH, (SCREEN_SIZE - PADDLE_HEIGHT) / 2, SCREEN_SIZE, SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2)]);
+  // g.fillRect.apply(this, right);
+
+  return [left, right];
+}
+
+function movePaddle(paddle, cycleTime) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const paddleMiddlePoint = Math.round(paddle[1] + PADDLE_HEIGHT / 2);
+      if (ball.y + Math.round(BALL_SIZE / 2) >= paddleMiddlePoint) {
+        if (paddle[1] >= SCREEN_SIZE){
+          resolve(paddle);
+          return;
+        }
+        paddle[1]++;
+        paddle[3]++;
+      } else if (ball.y + Math.round(BALL_SIZE / 2) <= paddleMiddlePoint) {
+          if (paddle[1] <= 0){
+            resolve(paddle);
+            return;
+          }
+        paddle[1]--;
+        paddle[3]--;
+      }
+      resolve(paddle);
+    }, getRandomWithBounds(cycleTime / 2, cycleTime * 2));
+  });
+}
+
+function drawPaddle(paddle) {
+  // g.fillRect(0, L_PADDLE_TOP, PADDLE_WIDTH, L_PADDLE_BOTTOM);
+  g.fillRect(paddle[0], paddle[1], paddle[2], paddle[3]);
+}
+
+function deletePaddleFromScreen(paddle) {
+  g.clearRect(paddle[0], paddle[1], paddle[2], paddle[3]);
 }
 
 function getRandomWithBounds(min, max){
@@ -141,11 +166,6 @@ function drawBall(ball){
 
 function deleteBallFromScreen(ball){
   g.clearRect(ball.x, ball.y, ball.x + ball.size, ball.y + ball.size);
-}
-
-
-function redrawBall(ball){
-  g.fillRect(ball.x, ball.y, ball.x + ball.size, ball.y + ball.size);
 }
 
 function moveBall(ball){
@@ -197,9 +217,6 @@ function reflectDir(direction, onWhich){
   if (onWhich === "LP" || onWhich === "RP") {
     return vLineOpposites[direction];
   }
-
-  // TODO: add vertical variations
-
 }
 
 function didScore(ball){
@@ -224,23 +241,27 @@ function isAboutToHitWall(ball){
   }
 
   if ((ball.direction === 2 || ball.direction === 3) &&
-      ball.y + 1 >= SCREEN_SIZE - 1) {
+      ball.y + BALL_SIZE + 1 >= SCREEN_SIZE - 1) {
       // bottom edge of the screen
       return [true, "BOT"];
   }
 
   if ((ball.direction === 0 || ball.direction === 3) &&
       (ball.x === (0 + PADDLE_WIDTH)) &&
-      (ball.y + BALL_SIZE) >= L_PADDLE_TOP &&
-      (ball.y <= L_PADDLE_BOTTOM)) {
+      // bottom of ball >= top of paddle
+      (ball.y + BALL_SIZE) >= paddles[0][1] &&
+      // top of ball <= bottom of paddle
+      (ball.y <= paddles[0][3])) {
         // left paddle
         return [true, "LP"];
   }
 
   if ((ball.direction === 1 || ball.direction === 2) &&
       (ball.x + BALL_SIZE === (SCREEN_SIZE - 1 - PADDLE_WIDTH)) &&
-      (ball.y + BALL_SIZE) >= R_PADDLE_TOP &&
-      (ball.y <= R_PADDLE_BOTTOM)) {
+      // bottom of ball >= top of paddle
+      (ball.y + BALL_SIZE) >= paddles[1][1] &&
+      // top of ball <= bottom of paddle
+      (ball.y <= paddles[1][3])) {
         // right paddle
         return [true, "RP"];
   }
@@ -250,14 +271,44 @@ function isAboutToHitWall(ball){
 
 g.clear();
 
-drawFieldAndPaddles();
+drawField();
+paddles = createPaddles();
+drawPaddle(paddles[0]);
+drawPaddle(paddles[1]);
 _drawFieldBorder();
-let ball = createBall(BALL_SIZE, 0);
+ball = createBall(BALL_SIZE, 0);
 drawBall(ball);
 
 const cycleTime = Math.round( (1 / BALL_SPEED) * 1000);
 let moves = 0;
+let oldPaddles = JSON.parse(JSON.stringify(paddles));
 let oldBall = Object.assign({}, ball);
+
+const paddleInterval = setInterval(() => {
+  // TODO: change the test value
+  if (moves > 250) {
+    clearInterval(paddleInterval);
+  }
+
+  movePaddle(paddles[0], cycleTime).then(movedPaddle => {
+    if (moves % REFRESH_RATE === 0) {
+      deletePaddleFromScreen(oldPaddles[0]);
+      oldPaddles[0] = JSON.parse(JSON.stringify(paddles[0]));
+      drawPaddle(movedPaddle);
+    }
+    paddles[0] = movedPaddle;
+  });
+  movePaddle(paddles[1], cycleTime).then(movedPaddle => {
+    if (moves % REFRESH_RATE === 0) {
+      deletePaddleFromScreen(oldPaddles[1]);
+      oldPaddles[1] = JSON.parse(JSON.stringify(paddles[1]));
+      drawPaddle(movedPaddle);
+    }
+    paddles[1] = movedPaddle;
+  });
+
+}, cycleTime);
+
 const moveInterval = setInterval(() => {
   // TODO: change the test value
   if (moves > 250){
@@ -279,8 +330,9 @@ const moveInterval = setInterval(() => {
 
   if (moves % REFRESH_RATE === 0) {
     deleteBallFromScreen(oldBall);
+    drawField();
     oldBall = Object.assign({}, ball);
-    redrawBall(ball);
+    drawBall(ball);
   }
 
   moves++;
