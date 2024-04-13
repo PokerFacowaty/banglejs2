@@ -279,7 +279,7 @@ function isAboutToHitWall(ball){
 
   if ((ball.direction === 0 || ball.direction === 3) &&
       // left of ball <= right of clock_box
-      ball.x <= (CLOCK_BOX[2] + 1) &&
+      ball.x === (CLOCK_BOX[2] + 1) &&
       ball.y >= CLOCK_BOX[1] &&
       ball.y <= CLOCK_BOX[3]) {
     return [true, "CR"];
