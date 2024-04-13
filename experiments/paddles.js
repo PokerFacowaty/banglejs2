@@ -33,11 +33,6 @@ const START_BOX_BOTTOM_RIGHT = new Uint8Array([
   SCREEN_SIZE
 ]);
 
-let L_PADDLE_TOP = (SCREEN_SIZE / PADDLE_HEIGHT) / 2;
-let L_PADDLE_BOTTOM = SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2);
-let R_PADDLE_TOP = (SCREEN_SIZE - PADDLE_HEIGHT) / 2;
-let R_PADDLE_BOTTOM = SCREEN_SIZE / 2 + (PADDLE_HEIGHT / 2);
-
 let ball;
 let paddles;
 
@@ -127,28 +122,28 @@ function movePaddle(paddle, cycleTime) {
   return new Promise((resolve) => {
     setTimeout(() => {
       const paddleMiddlePoint = Math.round(paddle[1] + PADDLE_HEIGHT / 2);
+      const distance = getRandomWithBounds(5, 25);
       if (ball.y + Math.round(BALL_SIZE / 2) >= paddleMiddlePoint) {
-        if (paddle[1] >= SCREEN_SIZE){
+        if ((paddle[1] + distance) >= SCREEN_SIZE){
           resolve(paddle);
           return;
         }
-        paddle[1]++;
-        paddle[3]++;
+        paddle[1] += distance;
+        paddle[3] += distance;
       } else if (ball.y + Math.round(BALL_SIZE / 2) <= paddleMiddlePoint) {
-          if (paddle[1] <= 0){
+          if ((paddle[1] - distance) <= 0){
             resolve(paddle);
             return;
           }
-        paddle[1]--;
-        paddle[3]--;
+        paddle[1] -= distance;
+        paddle[3] -= distance;
       }
       resolve(paddle);
-    }, getRandomWithBounds(cycleTime / 2, cycleTime * 2));
+    }, getRandomWithBounds(cycleTime * 2, cycleTime * 4));
   });
 }
 
 function drawPaddle(paddle) {
-  // g.fillRect(0, L_PADDLE_TOP, PADDLE_WIDTH, L_PADDLE_BOTTOM);
   g.fillRect(paddle[0], paddle[1], paddle[2], paddle[3]);
 }
 
@@ -180,26 +175,18 @@ function moveBall(ball){
 
   switch (ball.direction){
     case 0:
-      // ball.x -= ball.speed;
-      // ball.y -= ball.speed;
       ball.x--;
       ball.y--;
       break;
     case 1:
-      // ball.x += ball.speed;
-      // ball.y -= ball.speed;
       ball.x++;
       ball.y--;
       break;
     case 2:
-      // ball.x += ball.speed;
-      // ball.y += ball.speed;
       ball.x++;
       ball.y++;
       break;
     case 3:
-      // ball.x -= ball.speed;
-      // ball.y += ball.speed;
       ball.x--;
       ball.y++;
       break;
@@ -211,10 +198,10 @@ function reflectDir(direction, onWhich){
   const hLineOpposites = {0:3, 1:2, 2:1, 3:0};
   const vLineOpposites = {0:1, 1:0, 2:3, 3:2};
 
-  if (onWhich === "TOP" || onWhich === "BOT"){
+  if (onWhich === "TOP" || onWhich === "BOT" || onWhich === "CT" || onWhich === "CB"){
     return hLineOpposites[direction];
   }
-  if (onWhich === "LP" || onWhich === "RP") {
+  if (onWhich === "LP" || onWhich === "RP" || onWhich === "CL" || onWhich === "CR") {
     return vLineOpposites[direction];
   }
 }
@@ -266,6 +253,38 @@ function isAboutToHitWall(ball){
         return [true, "RP"];
   }
 
+  if ((ball.direction === 2 || ball.direction === 3) &&
+      // bottom of ball >= top of clock box
+      (ball.y + BALL_SIZE) === CLOCK_BOX[1] - 1 &&
+      ball.x >= CLOCK_BOX[0] &&
+      (ball.x + BALL_SIZE) <= CLOCK_BOX[2]) {
+    return [true, "CT"];
+  }
+
+  if ((ball.direction === 0 || ball.direction === 1) &&
+      // top of ball <= bottom of clock box
+      ball.y === CLOCK_BOX[3] + 1 &&
+      ball.x >= CLOCK_BOX[0] &&
+      (ball.x + BALL_SIZE) <= CLOCK_BOX[2]) {
+    return [true, "CB"];
+  }
+
+  if ((ball.direction === 1 || ball.direction === 2) &&
+      // right of ball >= left of clock_box
+      (ball.x + BALL_SIZE) === (CLOCK_BOX[0] - 1) &&
+      ball.y >= CLOCK_BOX[1] &&
+      ball.y <= CLOCK_BOX[3]) {
+    return [true, "CL"];
+  }
+
+  if ((ball.direction === 0 || ball.direction === 3) &&
+      // left of ball <= right of clock_box
+      ball.x <= (CLOCK_BOX[2] + 1) &&
+      ball.y >= CLOCK_BOX[1] &&
+      ball.y <= CLOCK_BOX[3]) {
+    return [true, "CR"];
+  }
+
   return [false, ""];
 }
 
@@ -286,7 +305,7 @@ let oldBall = Object.assign({}, ball);
 
 const paddleInterval = setInterval(() => {
   // TODO: change the test value
-  if (moves > 250) {
+  if (moves > 1000) {
     clearInterval(paddleInterval);
   }
 
@@ -311,7 +330,7 @@ const paddleInterval = setInterval(() => {
 
 const moveInterval = setInterval(() => {
   // TODO: change the test value
-  if (moves > 250){
+  if (moves > 1000){
     clearInterval(moveInterval);
   }
 
@@ -334,6 +353,7 @@ const moveInterval = setInterval(() => {
     oldBall = Object.assign({}, ball);
     drawBall(ball);
   }
+  console.log(process.memory());
 
   moves++;
 }, cycleTime);
