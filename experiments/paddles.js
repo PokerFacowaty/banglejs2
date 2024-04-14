@@ -234,7 +234,7 @@ function isAboutToHitWall(ball){
   }
 
   if ((ball.direction === 0 || ball.direction === 3) &&
-      (ball.x === (0 + PADDLE_WIDTH)) &&
+      (ball.x === (0 + PADDLE_WIDTH + 1)) &&
       // bottom of ball >= top of paddle
       (ball.y + BALL_SIZE) >= paddles[0][1] &&
       // top of ball <= bottom of paddle
