@@ -188,6 +188,7 @@ class Ball extends Block {
 
   bounceIfCollided() {
     // TODO: bouncing of top of paddles
+    // TODO: fix collision when only one of the corners of the ball is past the wall's corner
     if (
       (this.direction === 0 ||
        this.direction === 1) &&
