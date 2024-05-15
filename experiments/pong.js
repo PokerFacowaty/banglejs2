@@ -206,9 +206,9 @@ class Ball extends Block {
       this.y2 === SCREEN_SIZE ||
 
     // Top of clockBox
-    (this.x1 >= clockBox.x1 &&
-     this.x2 <= clockBox.x2 &&
-     this.y2 === clockBox.y1 - 1)
+      (this.x1 >= clockBox.x1 &&
+       this.x2 <= clockBox.x2 &&
+       this.y2 === clockBox.y1 - 1)
     ) {
       // Hitting downwards
       this.direction = {2: 1, 3: 0}[this.direction];
@@ -233,9 +233,9 @@ class Ball extends Block {
         this.direction === 2) &&
 
         // Left wall of clockBox
-       (this.y1 <= clockBox.y2 &&
-        this.y2 >= clockBox.y1 &&
-        this.x2 === clockBox.x1 - 1) ||
+      (this.y1 <= clockBox.y2 &&
+       this.y2 >= clockBox.y1 &&
+       this.x2 === clockBox.x1 - 1) ||
 
       // Right paddle
       (this.y1 <= rPaddle.y2 &&
@@ -244,6 +244,50 @@ class Ball extends Block {
     ) {
       // Hiting rightwards
       this.direction = {1: 0, 2: 3}[this.direction];
+    } else if (
+      this.direction === 0 &&
+      // Screen corner
+      (this.x1 === 0 && this.y1 === 0) ||
+      // clockBox corner
+      (this.x1 === clockBox.x2 + 1 && this.y1 === clockBox.y2 + 1) ||
+      // lPaddle corner
+      (this.x1 === lPaddle.x2 + 1 && this.y1 === lPaddle.x2 + 1)
+    ) {
+      // Top-left corner
+      this.direction = 2;
+    } else if (
+      this.direction === 1 &&
+      // Screen corner
+      (this.x2 === SCREEN_SIZE - 1 && this.y1 === 0) ||
+      // clockBox corner
+      (this.x2 === clockBox.x1 - 1 && this.y1 === clockBox.y2 + 1) ||
+      // rPaddle corner
+      (this.x2 === rPaddle.x1 - 1 && this.y1 === rPaddle.y2 + 1)
+    ) {
+      // Top-right corner
+      this.direction = 3;
+    } else if (
+      this.direction === 2 &&
+      // Screen corner
+      (this.x2 === SCREEN_SIZE - 1 && this.y2 === SCREEN_SIZE - 1) ||
+      // clockBox corner
+      (this.x2 === clockBox.x1 - 1 && this.y2 === clockBox.y1 - 1) ||
+      // rPaddle corner
+      (this.x2 === rPaddle.x1 - 1 && this.y2 === rPaddle.y1 - 1)
+    ) {
+      // Bottom - right corner
+      this.direction = 0;
+    } else if (
+      this.direction === 3 &&
+      // Screen corner
+      (this.x1 === SCREEN_SIZE - 1 && this.y2 === SCREEN_SIZE - 1) ||
+      // clockBox corner
+      (this.x1 === clockBox.x2 + 1 && this.y2 === clockBox.y1 - 1) ||
+      // lPaddle corner
+      (this.x1 === lPaddle.x2 + 1 && this.y2 === rPaddle.y1 - 1)
+    ) {
+      // Bottom-left corner
+      this.direction = 1;
     }
   }
 }
