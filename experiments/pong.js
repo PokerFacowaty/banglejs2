@@ -77,6 +77,8 @@ class Paddle extends Block {
     height = PADDLE_HEIGHT;
     width = PADDLE_WIDTH;
     let x1, y1, x2, y2;
+    let movesLeft = 0;
+    let currentDirectionY = 0;
 
     if (side === "R") {
       x1 = SCREEN_SIZE - PADDLE_WIDTH;
@@ -104,6 +106,18 @@ class Paddle extends Block {
     } else {
       this.moveWithinScreenBounds(0, byHowMuch);
     }
+  }
+
+  assignDirectionAndMoves(ball) {
+    if ((ball.y1 + ball.size) < (this.y1 + PADDLE_WIDTH)) {
+      this.currentDirectionY = -1;
+    } else if ((ball.y1 + ball.size) > (this.y1 + PADDLE_WIDTH)) {
+      this.currentDirectionY = 1;
+    } else {
+      this.currentDirectionY = 0;
+    }
+
+    this.movesLeft = getRandomIntWithinBounds(3, 50);
   }
 }
 
@@ -245,6 +259,8 @@ function updateScore(which) {
 }
 
 let ball = new Ball("");
+rPaddle.assignDirectionAndMoves(ball);
+lPaddle.assignDirectionAndMoves(ball);
 
 let moves = 0;
 const movementInterval = setInterval(() => {
@@ -268,7 +284,15 @@ const movementInterval = setInterval(() => {
   ball.bounceIfCollided();
 
   ball.moveInDirection(ball.direction);
-  lPaddle.maybeMove(ball);
-  rPaddle.maybeMove(ball);
+  // lPaddle.maybeMove(ball);
+  // rPaddle.maybeMove(ball);
+  if (rPaddle.movesLeft <= 0) rPaddle.assignDirectionAndMoves(ball);
+  rPaddle.moveWithinScreenBounds(0, rPaddle.currentDirectionY);
+  rPaddle.movesLeft--;
+
+  if (lPaddle.movesLeft <= 0) lPaddle.assignDirectionAndMoves(ball);
+  lPaddle.moveWithinScreenBounds(0, lPaddle.currentDirectionY);
+  lPaddle.movesLeft--;
+
   moves++;
 }, INTERVAL);
