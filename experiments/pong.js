@@ -200,18 +200,14 @@ class Ball extends Block {
         // Bottom of clockBox
         (
           this.y1 === clockBox.y2 + 1 &&
-
-          (this.x1 >= clockBox.x1 &&
-           this.x1 <= clockBox.x2) ||
-
-          (this.x2 >= clockBox.x1 &&
-           this.x2 <= clockBox.x2)
+          (
+            (this.x1 >= clockBox.x1 && this.x1 <= clockBox.x2) ||
+            (this.x2 >= clockBox.x1 && this.x2 <= clockBox.x2)
+          )
         )
       )
     ) {
       // Hitting upwards
-      console.log((this.x1 >= clockBox.x1 && this.x1 <= clockBox.x2), (this.x2 >= clockBox.x1 && this.x2 <= clockBox.x2), this.y1 === clockBox.y2 + 1);
-      console.log('first if');
       this.direction = {0: 3, 1: 2}[this.direction];
     } else if (
       (this.direction === 2 ||
@@ -224,17 +220,14 @@ class Ball extends Block {
         // Top of clockBox
         (
           this.y2 === clockBox.y1 - 1 &&
-
-          (this.x1 >= clockBox.x1 &&
-          this.x1 <= clockBox.x2) ||
-
-         (this.x2 >= clockBox.x1 &&
-          this.x2 <= clockBox.x2)
+          (
+            (this.x1 >= clockBox.x1 && this.x1 <= clockBox.x2) ||
+            (this.x2 >= clockBox.x1 && this.x2 <= clockBox.x2)
+          )
         )
       )
     ) {
       // Hitting downwards
-      console.log('second if ');
       this.direction = {2: 1, 3: 0}[this.direction];
     } else if (
       (this.direction === 0 ||
@@ -244,23 +237,20 @@ class Ball extends Block {
         // Right wall of clockBox
         (
           this.x1 === clockBox.x2 + 1 &&
-
-          (this.y1 >= clockBox.y1 &&
-           this.y1 <= clockBox.y2) ||
-
-          (this.y2 >= clockBox.y1 &&
-           this.y2 <= clockBox.y2)
+          (
+            (this.y1 >= clockBox.y1 && this.y1 <= clockBox.y2) ||
+            (this.y2 >= clockBox.y1 && this.y2 <= clockBox.y2)
+          )
         ) ||
 
         // Left paddle
         (
           this.x1 === lPaddle.x2 + 1 &&
 
-          (this.y1 >= lPaddle.y1 &&
-          this.y1 <= lPaddle.y2) ||
-
-         (this.y2 >= lPaddle.y1 &&
-          this.y2 <= lPaddle.y2)
+          (
+            (this.y1 >= lPaddle.y1 && this.y1 <= lPaddle.y2) ||
+            (this.y2 >= lPaddle.y1 && this.y2 <= lPaddle.y2)
+          )
         )
       )
     ) {
@@ -274,21 +264,19 @@ class Ball extends Block {
         // Left wall of clockBox
         (
         this.x2 === clockBox.x1 - 1 &&
-        (this.y1 >= clockBox.y1 &&
-        this.y1 <= clockBox.y2) ||
-
-       (this.y2 >= clockBox.y1 &&
-        this.y2 <= clockBox.y2)
+          (
+            (this.y1 >= clockBox.y1 && this.y1 <= clockBox.y2) ||
+            (this.y2 >= clockBox.y1 && this.y2 <= clockBox.y2)
+          )
         ) ||
 
         (
         // Right paddle
         this.x2 === rPaddle.x1 - 1 &&
-        (this.y1 >= rPaddle.y1 &&
-          this.y1 <= rPaddle.y2) ||
-
-        (this.y2 >= rPaddle.y1 &&
-          this.y2 <= rPaddle.y2)
+          (
+            (this.y1 >= rPaddle.y1 && this.y1 <= rPaddle.y2) ||
+            (this.y2 >= rPaddle.y1 && this.y2 <= rPaddle.y2)
+          )
         )
     )) {
       // Hiting rightwards
@@ -360,7 +348,6 @@ function getRandomIntWithinBounds(min, max) {
 const score = {"R": 0, "L": 0};
 function updateScore(which) {
   score[which]++;
-  console.log(score);
 }
 
 let ball = new Ball("");
@@ -369,7 +356,6 @@ lPaddle.assignDirectionAndMoves(ball);
 
 let moves = 0;
 const movementInterval = setInterval(() => {
-  console.log(ball);
   if (moves > 2000) {
     clearInterval(movementInterval);
     return;
@@ -390,8 +376,6 @@ const movementInterval = setInterval(() => {
   ball.bounceIfCollided();
 
   ball.moveInDirection(ball.direction);
-  // lPaddle.maybeMove(ball);
-  // rPaddle.maybeMove(ball);
   if (rPaddle.movesLeft <= 0) rPaddle.assignDirectionAndMoves(ball);
   rPaddle.moveWithinScreenBounds(0, rPaddle.currentDirectionY);
   rPaddle.movesLeft--;
