@@ -361,7 +361,7 @@ const movementInterval = setInterval(() => {
     return;
   }
 
-  g.setColor("#ffffff").fillRect(50, 20, 60, 30).setColor('#000000').drawString(`${score["L"]}:${score["R"]}`, 50, 20);
+  g.setColor(g.theme.bg).fillRect(50, 20, 60, 30).setColor(g.theme.fg).drawString(`${score["L"]}:${score["R"]}`, 50, 20);
 
   const scored = ball.didScore();
   if (scored) {
