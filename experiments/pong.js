@@ -206,7 +206,7 @@ class Ball extends Block {
     }
   }
 
-  newCheckCollision(box) {
+  checkCollision(box) {
     const ballIsToTheRight = this.x > box.x2;
     const ballIsToTheLeft = this.x2 < box.x;
     const ballIsAbove = this.y2 < box.y;
@@ -243,7 +243,7 @@ function main() {
 
     let collidedWith;
     for (const box of [clockBox, rPaddle, lPaddle, topBox, botBox]) {
-      if (ball.newCheckCollision(box)) { collidedWith = box }
+      if (ball.checkCollision(box)) { collidedWith = box }
     }
 
     ball.moveUsingSpeed();
