@@ -213,9 +213,6 @@ class Ball extends Block {
     const ballIsBelow = this.y > box.y2;
 
     if (!(ballIsToTheRight || ballIsToTheLeft || ballIsAbove || ballIsBelow)) {
-      console.log("COLLISION!");
-      console.log(this);
-      console.log("collision with: ", JSON.stringify(box));
       this.handleCollisionNoCorners(box);
       return box;
     }
