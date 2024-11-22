@@ -234,8 +234,8 @@ function main() {
   const clockBox = new Block(CLOCK_BOX_LOCATION.x, CLOCK_BOX_LOCATION.y, CLOCK_BOX_LOCATION.x2, CLOCK_BOX_LOCATION.y2, false);
   const rPaddle = new Paddle("R");
   const lPaddle = new Paddle("L");
-  const topBox = new Block(0, 0, SCREEN_WIDTH - 1, 0);
-  const botBox = new Block(0, SCREEN_HEIGHT - 1, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
+  const topBox = new Block(0, -1, SCREEN_WIDTH - 1, -1);
+  const botBox = new Block(0, SCREEN_HEIGHT, SCREEN_WIDTH - 1, SCREEN_HEIGHT);
   const ball = new Ball();
   const mainLoop = setInterval(() => {
     const whoScored = ball.didScore();
