@@ -30,9 +30,6 @@ class Block {
     g.fillRect(this.x, this.y, this.x2, this.y2);
   }
 
-  drawBorder() {
-  }
-
   clear() {
     g.clearRect(this.x, this.y, this.x2, this.y2);
   }
