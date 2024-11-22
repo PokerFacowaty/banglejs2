@@ -1,388 +1,266 @@
-const SCREEN_SIZE = 176;
+// Regular consts
+const SCREEN_HEIGHT = g.getHeight();
+const SCREEN_WIDTH = g.getWidth(); // TODO: account for widget panel
+const BALL_SIZE = 6; // hehehe
+const CLOCK_BOX_LOCATION = {x: 25, y: 50, x2: SCREEN_WIDTH - 25, y2: SCREEN_HEIGHT - 50};
+const INTERVAL = 20; // How often should the main loop loop in ms
 const PADDLE_HEIGHT = 20;
 const PADDLE_WIDTH = 5;
-// const REFRESH_RATE = 1;
-const BALL_SIZE = 6;
+
+// Debug consts
 const DEBUG_COLOR = "#ff0000";
-const START_BOX_W = 50;
-const INTERVAL = 20;
-
-class Box {
-  constructor(x1, y1, x2, y2) {
-    this.x1 = x1;
-    this.y1 = y1;
-    this.x2 = x2;
-    this.y2 = y2;
-  }
-
-  draw() {
-    g.drawRect(this.x1, this.y1, this.x2, this.y2);
-  }
-}
-
-const clockBox = new Box(25, 50, SCREEN_SIZE - 25, SCREEN_SIZE - 50);
-
-const _startBoxes = [
-  new Box((SCREEN_SIZE / 2) - START_BOX_W, 0, SCREEN_SIZE / 2, clockBox.y1),
-  new Box(SCREEN_SIZE / 2, 0, SCREEN_SIZE / 2 + START_BOX_W, clockBox.y1),
-  new Box(SCREEN_SIZE / 2, clockBox.y2, SCREEN_SIZE / 2 + START_BOX_W, SCREEN_SIZE),
-  new Box(SCREEN_SIZE / 2 - START_BOX_W, clockBox.y2, SCREEN_SIZE / 2 + START_BOX_W, SCREEN_SIZE)
-];
-
-const startBoxes = {
-  topLeft: new Box((SCREEN_SIZE / 2) - START_BOX_W, 0, SCREEN_SIZE / 2, clockBox.y1),
-  topRight: new Box(SCREEN_SIZE / 2, 0, SCREEN_SIZE / 2 + START_BOX_W, clockBox.y1),
-  bottomRight: new Box(SCREEN_SIZE / 2, clockBox.y2, SCREEN_SIZE / 2 + START_BOX_W, SCREEN_SIZE),
-  bottomLeft: new Box(SCREEN_SIZE / 2 - START_BOX_W, clockBox.y2, SCREEN_SIZE / 2 + START_BOX_W, SCREEN_SIZE),
-};
 
 class Block {
+  // A generic movable object
+
+  constructor(x, y, x2, y2, borderOnly) {
+    this.x = x;
+    this.y = y;
+    this.x2 = x2;
+    this.y2 = y2;
+    this.borderOnly = borderOnly;
+    this.draw();
+  }
+
   draw() {
-    g.fillRect(this.x1, this.y1, this.x2, this.y2);
+    if (this.borderOnly) {
+      g.drawRect(this.x, this.y, this.x2, this.y2)
+      return;
+    }
+    g.fillRect(this.x, this.y, this.x2, this.y2);
+  }
+
+  drawBorder() {
   }
 
   clear() {
-    g.clearRect(this.x1, this.y1, this.x2, this.y2);
+    g.clearRect(this.x, this.y, this.x2, this.y2);
   }
 
   move(x, y) {
-    g.clearRect(this.x1, this.y1, this.x2, this.y2);
-    this.x1 += x;
-    this.y1 += y;
+    // Physically move the visible object on screen, not just change the values
+    this.clear();
+    this.x += x;
+    this.y += y;
     this.x2 += x;
     this.y2 += y;
-    g.fillRect(this.x1, this.y1, this.x2, this.y2);
-  }
-
-  moveWithinScreenBounds(x, y) {
-    if ((this.x1 + x) < 0) x = -this.x1;
-    if ((this.x2 + x) > (SCREEN_SIZE - 1)) x = 175 - this.x2;
-    if ((this.y1 + y) < 0) y = -this.y1;
-    if ((this.y2 + y) > (SCREEN_SIZE - 1)) y = 175 - this.y2;
-    this.move(x, y);
-  }
-
-  constructor(x1, y1, x2, y2) {
-    this.x1 = x1;
-    this.y1 = y1;
-    this.x2 = x2;
-    this.y2 = y2;
     this.draw();
+  }
+
+  moveWithinScreen(x, y) {
+    // Sets x or y to 0 if it would mean going beyond the screen
+    if (((this.x + x) < 0) || (this.x2 + x) >= SCREEN_HEIGHT) {
+      x = 0;
+    }
+
+    if (((this.y + y) < 0) || (this.y2 + y) >= SCREEN_WIDTH) {
+      y = 0;
+    }
+
+    this.move(x, y);
   }
 }
 
 class Paddle extends Block {
+  /** A paddle moves by itself. It checks where the ball is and tries to move
+    * in that direction. A paddle that moves whenever the ball moves would be
+    * boring, so it checks where the ball is and assigns a random amount
+    * of moves to itself in that direction. If there are any moves to be done,
+    * it just moves in the specified direction. **/
 
-  constructor(side) {
-    height = PADDLE_HEIGHT;
-    width = PADDLE_WIDTH;
-    let x1, y1, x2, y2;
-    let movesLeft = 0;
-    let currentDirectionY = 0;
+  constructor (side) {
+    this.movesLeft = 0;
+    this.direction = 0;
+    let x, y, x2, y2;
 
-    if (side === "R") {
-      x1 = SCREEN_SIZE - PADDLE_WIDTH;
-      y1 = (SCREEN_SIZE - PADDLE_HEIGHT) / 2;
-      x2 = SCREEN_SIZE;
-      y2 = (SCREEN_SIZE / 2) + (PADDLE_HEIGHT / 2);
-    } else {
-      x1 = 0;
-      y1 = (SCREEN_SIZE - PADDLE_HEIGHT) / 2;
+    if (side === "L") {
+      x = 0;
+      y = Math.round((SCREEN_HEIGHT - PADDLE_HEIGHT) / 2);
       x2 = PADDLE_WIDTH;
-      y2 = (SCREEN_SIZE / 2) + (PADDLE_HEIGHT / 2); 
+      y2 = y + PADDLE_HEIGHT;
+    } else {
+      x = SCREEN_WIDTH - PADDLE_WIDTH;
+      y = Math.round((SCREEN_HEIGHT - PADDLE_HEIGHT) / 2);
+      x2 = SCREEN_WIDTH;
+      y2 = y + PADDLE_HEIGHT;
     }
 
-    super(x1, y1, x2, y2);
+    super(x, y, x2, y2);
   }
 
-  maybeMove(ball) {
-    if (getRandomIntWithinBounds(0, 2)) {
+  moveOrDecide(ball) {
+    if (this.movesLeft > 0) {
+      super.moveWithinScreen(0, this.direction);
+      this.movesLeft--;
       return;
     }
 
-    const byHowMuch = getRandomIntWithinBounds(5, 50);
-    if ((ball.y1 + ball.size) < (this.y1 + PADDLE_WIDTH)) {
-      this.moveWithinScreenBounds(0, -byHowMuch);
-    } else {
-      this.moveWithinScreenBounds(0, byHowMuch);
-    }
+    this.assignDirectionAndMoves(ball);
   }
 
   assignDirectionAndMoves(ball) {
-    if ((ball.y1 + ball.size) < (this.y1 + PADDLE_WIDTH)) {
-      this.currentDirectionY = -1;
-    } else if ((ball.y1 + ball.size) > (this.y1 + PADDLE_WIDTH)) {
-      this.currentDirectionY = 1;
+    const ballMiddle = ball.y + Math.round(BALL_SIZE / 2);
+    const paddleMiddle = this.y + Math.round(PADDLE_HEIGHT / 2);
+    if (ballMiddle > paddleMiddle) {
+      // ball LOWER than paddle (y starts at 0, this can be counterintuitive)
+      this.direction = 1;
+    } else if (ballMiddle < paddleMiddle) {
+      this.direction = -1;
     } else {
-      this.currentDirectionY = 0;
+      this.direction = 0;
+      this.movesLeft = 0;
+      return;
     }
 
-    this.movesLeft = getRandomIntWithinBounds(3, 50);
+    /** The bounds times INTERVAL give you for how long the paddles can be
+      * moving. So between 3 and 50 gives you between 60 and 1000 ms **/
+    this.movesLeft = getRandIntWithinBounds(3, 50);
   }
 }
 
-g.clear();
-clockBox.draw();
-const rPaddle = new Paddle("R");
-const lPaddle = new Paddle("L");
-
 class Ball extends Block {
+  /** A ball can move in four directions diagonally. **/
 
-  constructor(side) {
-    this.size = BALL_SIZE;
-    let x1, y1;
+  constructor() {
+    /** This should only get called at the very start of the game, so it
+      * randomizes the ball's position and direction within reason **/
 
-    if (side === "L") {
-      x1 = getRandomIntWithinBounds(
-        // it's only for x so top or bottom doesn't make a difference
-        startBoxes.topLeft.x1, startBoxes.topLeft.x2
-      );
-      this.direction = Math.round(Math.random()) + 1; // 1 or 2
-    } else if (side === "R") {
-      x1 = getRandomIntWithinBounds(
-        startBoxes.topRight.x1, startBoxes.topRight.x2
-      );
-      this.direction = 3 * Math.round(Math.random()); // 0 or 3
+    x = getRandIntWithinBounds(
+      CLOCK_BOX_LOCATION.x + 25, CLOCK_BOX_LOCATION.x2 - 25);
+
+    if (Math.round(Math.random()) > 0) {
+      // Above the clock box
+      y = getRandIntWithinBounds(
+        0, CLOCK_BOX_LOCATION.y - 10
+      );   
     } else {
-      x1 = (SCREEN_SIZE / 2) - (BALL_SIZE / 2);
-      this.direction = getRandomIntWithinBounds(0, 3);
+      y = getRandIntWithinBounds(CLOCK_BOX_LOCATION.y2 + 10, SCREEN_HEIGHT);
     }
 
-    const belowClock = Boolean(Math.round(Math.random()));
-    if (belowClock) {
-      y1 = getRandomIntWithinBounds(clockBox.y2, SCREEN_SIZE - this.size);
-    } else {
-      y1 = getRandomIntWithinBounds(0, clockBox.y1 - this.size);
-    }
+    super(x, y, x + BALL_SIZE, y + BALL_SIZE);
+    this.speedX = Math.round(Math.random()) ? 1 : -1;
+    this.speedY = Math.round(Math.random()) ? 1 : -1;
+  }
 
-    super(x1, y1, x1 + this.size, y1 + this.size);
+  moveUsingSpeed() {
+    // this.moveWithinScreen(this.speedX, this.speedY);
+    this.move(this.speedX, this.speedY);
   }
 
   didScore() {
-    if (this.x2 > SCREEN_SIZE - 1) {
+    if (this.x <= 0) {
+      return "R";
+    }
+
+    if (this.x2 >= SCREEN_WIDTH - 1) {
       return "L";
     }
 
-    if (this.x1 < 0) {
-      return "R";
-    }
     return "";
   }
 
-  moveInDirection(direction) {
-    switch (direction) {
-      case 0:
-        this.move(-1, -1);
-        break;
-      case 1:
-        this.move(1, -1);
-        break;
-      case 2:
-        this.move(1, 1);
-        break;
-      case 3:
-        this.move(-1, 1);
-        break;
+  resetToMiddle(whoScored) {
+    // After one of the paddles scores
+    
+    const clockBoxMiddle = Math.round(
+      (CLOCK_BOX_LOCATION.x2 - CLOCK_BOX_LOCATION.y) / 2);
+
+    if (Math.round(Math.random()) > 0) {
+      // Above the clock box
+      y = getRandIntWithinBounds(0, CLOCK_BOX_LOCATION.y - 10);
+    } else {
+      y = getRandIntWithinBounds(CLOCK_BOX_LOCATION.y2 + 10, SCREEN_HEIGHT);
+    }
+
+    if (whoScored === "R") {
+      x = getRandIntWithinBounds(CLOCK_BOX_LOCATION.x2 - 25, clockBoxMiddle);
+      this.speedX = -1;
+    } else {
+      x = getRandIntWithinBounds(CLOCK_BOX_LOCATION.x + 25, clockBoxMiddle);
+      this.speedX = 1;
+    }
+
+    this.speedY = Math.round(Math.random()) > 0 ? 1 : -1;
+    this.moveToLocation(x, y);
+  }
+
+  moveToLocation(x, y) {
+    this.clear();
+    this.x = x;
+    this.y = y;
+    this.x2 = x + BALL_SIZE;
+    this.y2 = y + BALL_SIZE;
+    this.draw();
+  }
+
+  handleCollisionNoCorners(box) {
+    if (this.speedY < 0 && (this.y === box.y2)) {
+      // this was going up and hit something above
+      this.speedY = 1;
+    } else if (this.speedY > 0 && (this.y2 === box.y)) {
+      // this was going down and hit something below
+      this.speedY = -1;
+    } else if (this.speedX > 0 && (this.x2 === box.x)) {
+      // this was going right and hit something right
+      this.speedX = -1;
+    } else if (this.speedX < 0 && (this.x === box.x2)) {
+      // this was going left and hit something left
+      this.speedX = 1;
     }
   }
 
-  bounceIfCollided() {
-    // TODO: bouncing of top of paddles
-    // TODO: fix collision when only one of the corners of the ball is past the wall's corner
-    if (
-      (this.direction === 0 ||
-       this.direction === 1) &&
+  newCheckCollision(box) {
+    const ballIsToTheRight = this.x > box.x2;
+    const ballIsToTheLeft = this.x2 < box.x;
+    const ballIsAbove = this.y2 < box.y;
+    const ballIsBelow = this.y > box.y2;
 
-      (
-        // Top of the screen
-        this.y1 === 0 ||
-
-        // Bottom of clockBox
-        (
-          this.y1 === clockBox.y2 + 1 &&
-          (
-            (this.x1 >= clockBox.x1 && this.x1 <= clockBox.x2) ||
-            (this.x2 >= clockBox.x1 && this.x2 <= clockBox.x2)
-          )
-        )
-      )
-    ) {
-      // Hitting upwards
-      this.direction = {0: 3, 1: 2}[this.direction];
-    } else if (
-      (this.direction === 2 ||
-       this.direction === 3) &&
-
-      (
-        // Bottom of the screen
-        this.y2 === SCREEN_SIZE ||
-
-        // Top of clockBox
-        (
-          this.y2 === clockBox.y1 - 1 &&
-          (
-            (this.x1 >= clockBox.x1 && this.x1 <= clockBox.x2) ||
-            (this.x2 >= clockBox.x1 && this.x2 <= clockBox.x2)
-          )
-        )
-      )
-    ) {
-      // Hitting downwards
-      this.direction = {2: 1, 3: 0}[this.direction];
-    } else if (
-      (this.direction === 0 ||
-        this.direction === 3) &&
-
-      (
-        // Right wall of clockBox
-        (
-          this.x1 === clockBox.x2 + 1 &&
-          (
-            (this.y1 >= clockBox.y1 && this.y1 <= clockBox.y2) ||
-            (this.y2 >= clockBox.y1 && this.y2 <= clockBox.y2)
-          )
-        ) ||
-
-        // Left paddle
-        (
-          this.x1 === lPaddle.x2 + 1 &&
-
-          (
-            (this.y1 >= lPaddle.y1 && this.y1 <= lPaddle.y2) ||
-            (this.y2 >= lPaddle.y1 && this.y2 <= lPaddle.y2)
-          )
-        )
-      )
-    ) {
-      // Hitting leftwards
-      this.direction = {0: 1, 3: 2}[this.direction];
-    } else if (
-      (this.direction === 1 ||
-       this.direction === 2) &&
-
-      (
-        // Left wall of clockBox
-        (
-        this.x2 === clockBox.x1 - 1 &&
-          (
-            (this.y1 >= clockBox.y1 && this.y1 <= clockBox.y2) ||
-            (this.y2 >= clockBox.y1 && this.y2 <= clockBox.y2)
-          )
-        ) ||
-
-        (
-        // Right paddle
-        this.x2 === rPaddle.x1 - 1 &&
-          (
-            (this.y1 >= rPaddle.y1 && this.y1 <= rPaddle.y2) ||
-            (this.y2 >= rPaddle.y1 && this.y2 <= rPaddle.y2)
-          )
-        )
-    )) {
-      // Hiting rightwards
-      this.direction = {1: 0, 2: 3}[this.direction];
-    } else if (
-      this.direction === 0 &&
-
-      (
-        // Screen corner
-        (this.x1 === 0 && this.y1 === 0) ||
-        // clockBox corner
-        (this.x1 === clockBox.x2 + 1 && this.y1 === clockBox.y2 + 1) ||
-        // lPaddle corner
-        (this.x1 === lPaddle.x2 + 1 && this.y1 === lPaddle.x2 + 1)
-      )
-    ) {
-      // Top-left corner
-      this.direction = 2;
-    } else if (
-      this.direction === 1 &&
-
-      (
-        // Screen corner
-        (this.x2 === SCREEN_SIZE - 1 && this.y1 === 0) ||
-        // clockBox corner
-        (this.x2 === clockBox.x1 - 1 && this.y1 === clockBox.y2 + 1) ||
-        // rPaddle corner
-        (this.x2 === rPaddle.x1 - 1 && this.y1 === rPaddle.y2 + 1)
-      )
-    ) {
-      // Top-right corner
-      this.direction = 3;
-    } else if (
-      this.direction === 2 &&
-
-      (
-      // Screen corner
-      (this.x2 === SCREEN_SIZE - 1 && this.y2 === SCREEN_SIZE - 1) ||
-      // clockBox corner
-      (this.x2 === clockBox.x1 - 1 && this.y2 === clockBox.y1 - 1) ||
-      // rPaddle corner
-      (this.x2 === rPaddle.x1 - 1 && this.y2 === rPaddle.y1 - 1)
-      )
-    ) {
-      // Bottom - right corner
-      this.direction = 0;
-    } else if (
-      this.direction === 3 &&
-
-      (
-      // Screen corner
-      (this.x1 === SCREEN_SIZE - 1 && this.y2 === SCREEN_SIZE - 1) ||
-      // clockBox corner
-      (this.x1 === clockBox.x2 + 1 && this.y2 === clockBox.y1 - 1) ||
-      // lPaddle corner
-      (this.x1 === lPaddle.x2 + 1 && this.y2 === rPaddle.y1 - 1)
-      )
-    ) {
-      // Bottom-left corner
-      this.direction = 1;
+    if (!(ballIsToTheRight || ballIsToTheLeft || ballIsAbove || ballIsBelow)) {
+      console.log("COLLISION!");
+      console.log(this);
+      console.log("collision with: ", JSON.stringify(box));
+      this.handleCollisionNoCorners(box);
+      return box;
     }
+    return null;
   }
 }
 
-function getRandomIntWithinBounds(min, max) {
+function getRandIntWithinBounds(min, max) {
   return Math.round(Math.random() * (max - min) + min);
 }
 
-const score = {"R": 0, "L": 0};
-function updateScore(which) {
-  score[which]++;
+
+
+function main() {
+  g.clear();
+  const clockBox = new Block(CLOCK_BOX_LOCATION.x, CLOCK_BOX_LOCATION.y, CLOCK_BOX_LOCATION.x2, CLOCK_BOX_LOCATION.y2, false);
+  const rPaddle = new Paddle("R");
+  const lPaddle = new Paddle("L");
+  const topBox = new Block(0, 0, SCREEN_WIDTH - 1, 0);
+  const botBox = new Block(0, SCREEN_HEIGHT - 1, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
+  const ball = new Ball();
+  const mainLoop = setInterval(() => {
+    const whoScored = ball.didScore();
+    if (whoScored) {
+      ball.resetToMiddle(whoScored);
+      return;
+    }
+
+    let collidedWith;
+    for (const box of [clockBox, rPaddle, lPaddle, topBox, botBox]) {
+      if (ball.newCheckCollision(box)) { collidedWith = box }
+    }
+
+    ball.moveUsingSpeed();
+
+    if (collidedWith) {
+      collidedWith.draw();
+    }
+
+    lPaddle.moveOrDecide(ball);
+    rPaddle.moveOrDecide(ball);
+  }, INTERVAL);
 }
 
-let ball = new Ball("");
-rPaddle.assignDirectionAndMoves(ball);
-lPaddle.assignDirectionAndMoves(ball);
-
-let moves = 0;
-const movementInterval = setInterval(() => {
-  if (moves > 2000) {
-    clearInterval(movementInterval);
-    return;
-  }
-
-  g.setColor(g.theme.bg).fillRect(50, 20, 60, 30).setColor(g.theme.fg).drawString(`${score["L"]}:${score["R"]}`, 50, 20);
-
-  const scored = ball.didScore();
-  if (scored) {
-    // TODO: add points;
-    updateScore(scored);
-
-    ball.clear();
-    ball = new Ball(scored);
-    return;
-  }
-
-  ball.bounceIfCollided();
-
-  ball.moveInDirection(ball.direction);
-  if (rPaddle.movesLeft <= 0) rPaddle.assignDirectionAndMoves(ball);
-  rPaddle.moveWithinScreenBounds(0, rPaddle.currentDirectionY);
-  rPaddle.movesLeft--;
-
-  if (lPaddle.movesLeft <= 0) lPaddle.assignDirectionAndMoves(ball);
-  lPaddle.moveWithinScreenBounds(0, lPaddle.currentDirectionY);
-  lPaddle.movesLeft--;
-
-  moves++;
-}, INTERVAL);
+main();
