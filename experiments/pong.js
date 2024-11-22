@@ -2,7 +2,7 @@
 const SCREEN_HEIGHT = g.getHeight();
 const SCREEN_WIDTH = g.getWidth(); // TODO: account for widget panel
 const BALL_SIZE = 6; // hehehe
-const CLOCK_BOX_LOCATION = {x: 25, y: 50, x2: SCREEN_WIDTH - 25, y2: SCREEN_HEIGHT - 50};
+const CLOCK_BOX_LOCATION = {x: 20, y: 40, x2: SCREEN_WIDTH - 20, y2: SCREEN_HEIGHT - 40};
 const INTERVAL = 20; // How often should the main loop loop in ms
 const PADDLE_HEIGHT = 20;
 const PADDLE_WIDTH = 5;
@@ -24,7 +24,7 @@ class Block {
 
   draw() {
     if (this.borderOnly) {
-      g.drawRect(this.x, this.y, this.x2, this.y2)
+      g.drawRect(this.x, this.y, this.x2, this.y2);
       return;
     }
     g.fillRect(this.x, this.y, this.x2, this.y2);
@@ -226,9 +226,9 @@ function getRandIntWithinBounds(min, max) {
 
 
 
-function main() {
+function pong() {
   g.clear();
-  const clockBox = new Block(CLOCK_BOX_LOCATION.x, CLOCK_BOX_LOCATION.y, CLOCK_BOX_LOCATION.x2, CLOCK_BOX_LOCATION.y2, false);
+  const clockBox = new Block(CLOCK_BOX_LOCATION.x, CLOCK_BOX_LOCATION.y, CLOCK_BOX_LOCATION.x2, CLOCK_BOX_LOCATION.y2, true);
   const rPaddle = new Paddle("R");
   const lPaddle = new Paddle("L");
   const topBox = new Block(0, -1, SCREEN_WIDTH - 1, -1);
@@ -257,4 +257,19 @@ function main() {
   }, INTERVAL);
 }
 
-main();
+function drawClock() {
+  const date = new Date();
+  const timeStr = require("locale").time(date, 1); // Hour and minute
+  const dateStr = require("locale").date(date, 0).toUpperCase() + "\n" +
+                  require("locale").dow(date, 0).toUpperCase();
+
+g.setFontAlign(0, 0).setFont("7x11Numeric7Seg:4").drawString(timeStr, CLOCK_BOX_LOCATION.x + 70, CLOCK_BOX_LOCATION.y + 30, true /* Clear background */);
+  g.setFontAlign(0, 0).setFont("6x8", 2).drawString(dateStr, CLOCK_BOX_LOCATION.x + 70, CLOCK_BOX_LOCATION.y + 72, true);
+}
+
+require("Font7x11Numeric7Seg").add(Graphics);
+g.clear();
+drawClock();
+pong();
+setInterval(drawClock, 1000);
+Bangle.setUI("clock");
