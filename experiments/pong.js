@@ -1,8 +1,10 @@
 // Regular consts
 const SCREEN_HEIGHT = g.getHeight();
 const SCREEN_WIDTH = g.getWidth(); // TODO: account for widget panel
+const SCREEN_TOP = 24; // widgets assumed at the top
 const BALL_SIZE = 6; // hehehe
-const CLOCK_BOX_LOCATION = {x: 20, y: 40, x2: SCREEN_WIDTH - 20, y2: SCREEN_HEIGHT - 40};
+const CLOCK_BOX_LOCATION = {x: 20, y: SCREEN_TOP + 30, x2: SCREEN_WIDTH - 20, y2: SCREEN_HEIGHT - 30};
+const GAMES_TO_BE_PLAYED = 5;
 const INTERVAL = 20; // How often should the main loop loop in ms
 const PADDLE_HEIGHT = 20;
 const PADDLE_WIDTH = 5;
@@ -50,7 +52,8 @@ class Block {
       x = 0;
     }
 
-    if (((this.y + y) < 0) || (this.y2 + y) >= SCREEN_WIDTH) {
+    if (((this.y + y) < SCREEN_TOP + 1) || (this.y2 + y) >= SCREEN_HEIGHT) {
+                      // +1 because of the block below widgets, not ideal
       y = 0;
     }
 
@@ -78,7 +81,7 @@ class Paddle extends Block {
     } else {
       x = SCREEN_WIDTH - PADDLE_WIDTH;
       y = Math.round((SCREEN_HEIGHT - PADDLE_HEIGHT) / 2);
-      x2 = SCREEN_WIDTH;
+      x2 = SCREEN_WIDTH - 1;
       y2 = y + PADDLE_HEIGHT;
     }
 
@@ -128,7 +131,7 @@ class Ball extends Block {
     if (Math.round(Math.random()) > 0) {
       // Above the clock box
       y = getRandIntWithinBounds(
-        0, CLOCK_BOX_LOCATION.y - 10
+        SCREEN_TOP + 1, CLOCK_BOX_LOCATION.y - 10
       );   
     } else {
       y = getRandIntWithinBounds(CLOCK_BOX_LOCATION.y2 + 10, SCREEN_HEIGHT);
@@ -164,9 +167,9 @@ class Ball extends Block {
 
     if (Math.round(Math.random()) > 0) {
       // Above the clock box
-      y = getRandIntWithinBounds(0, CLOCK_BOX_LOCATION.y - 10);
+      y = getRandIntWithinBounds(SCREEN_TOP + 1, CLOCK_BOX_LOCATION.y - 10);
     } else {
-      y = getRandIntWithinBounds(CLOCK_BOX_LOCATION.y2 + 10, SCREEN_HEIGHT);
+      y = getRandIntWithinBounds(CLOCK_BOX_LOCATION.y2 + 10, SCREEN_HEIGHT - 2);
     }
 
     if (whoScored === "R") {
@@ -226,17 +229,30 @@ function getRandIntWithinBounds(min, max) {
 
 
 
-function pong() {
-  g.clear();
+function pong(lockedScreen) {
+  if (lockedScreen) return;
+  // g.clear();
+  Bangle.drawWidgets();
+  g.reset();
   const clockBox = new Block(CLOCK_BOX_LOCATION.x, CLOCK_BOX_LOCATION.y, CLOCK_BOX_LOCATION.x2, CLOCK_BOX_LOCATION.y2, true);
   const rPaddle = new Paddle("R");
   const lPaddle = new Paddle("L");
-  const topBox = new Block(0, -1, SCREEN_WIDTH - 1, -1);
-  const botBox = new Block(0, SCREEN_HEIGHT, SCREEN_WIDTH - 1, SCREEN_HEIGHT);
+  const topBox = new Block(0, SCREEN_TOP + 1, SCREEN_WIDTH - 1, SCREEN_TOP + 1);
+  const botBox = new Block(0, SCREEN_HEIGHT - 1, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
   const ball = new Ball();
+  let scores = 0;
   const mainLoop = setInterval(() => {
+    if (scores > GAMES_TO_BE_PLAYED) {
+      clearInterval(mainLoop);
+      ball.clear();
+      rPaddle.clear();
+      lPaddle.clear();
+      return;
+    }
+    g.reset();
     const whoScored = ball.didScore();
     if (whoScored) {
+      scores++;
       ball.resetToMiddle(whoScored);
       return;
     }
@@ -258,6 +274,7 @@ function pong() {
 }
 
 function drawClock() {
+  g.reset();
   const date = new Date();
   const timeStr = require("locale").time(date, 1); // Hour and minute
   const dateStr = require("locale").date(date, 0).toUpperCase() + "\n" +
@@ -270,6 +287,9 @@ g.setFontAlign(0, 0).setFont("7x11Numeric7Seg:4").drawString(timeStr, CLOCK_BOX_
 require("Font7x11Numeric7Seg").add(Graphics);
 g.clear();
 drawClock();
-pong();
+Bangle.loadWidgets();
+Bangle.drawWidgets();
 setInterval(drawClock, 1000);
 Bangle.setUI("clock");
+
+Bangle.on('lock', pong);
