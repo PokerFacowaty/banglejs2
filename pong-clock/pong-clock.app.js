@@ -185,16 +185,16 @@ class Ball extends Block {
 
   handleCollisionNoCorners(box) {
     if (this.speedY < 0 && (this.y === box.y2)) {
-      // this was going up and hit something above
+      // ball was going up and hit something above
       this.speedY = 1;
     } else if (this.speedY > 0 && (this.y2 === box.y)) {
-      // this was going down and hit something below
+      // ball was going down and hit something below
       this.speedY = -1;
     } else if (this.speedX > 0 && (this.x2 === box.x)) {
-      // this was going right and hit something right
+      // ball was going right and hit something right
       this.speedX = -1;
     } else if (this.speedX < 0 && (this.x === box.x2)) {
-      // this was going left and hit something left
+      // ball was going left and hit something left
       this.speedX = 1;
     }
   }
