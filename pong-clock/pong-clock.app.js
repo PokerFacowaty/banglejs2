@@ -16,17 +16,19 @@ const DEBUG_COLOR = "#ff0000";
 class Block {
   // A generic movable object
 
-  constructor(x, y, x2, y2, borderOnly) {
+  constructor(x, y, x2, y2, visibility) {
     this.x = x;
     this.y = y;
     this.x2 = x2;
     this.y2 = y2;
-    this.borderOnly = borderOnly;
+    // 'full', 'none', 'border only'
+    visibility ? this.visibility = visibility : this.visibility = 'full';
     this.draw();
   }
 
   draw() {
-    if (this.borderOnly) {
+    if (this.visibility === 'none') return;
+    if (this.visibility === 'border only') {
       g.drawRect(this.x, this.y, this.x2, this.y2);
       return;
     }
@@ -215,7 +217,7 @@ function pong(lockedScreen) {
   pongPlaying = true;
   Bangle.drawWidgets();
   g.reset();
-  const clockBox = new Block(CLK_BOX.x, CLK_BOX.y, CLK_BOX.x2, CLK_BOX.y2, true);
+  const clockBox = new Block(CLK_BOX.x, CLK_BOX.y, CLK_BOX.x2, CLK_BOX.y2, 'border only');
   const rPaddle = new Paddle("R");
   const lPaddle = new Paddle("L");
   const topBox = new Block(0, SCREEN_TOP + 1, SCREEN_WIDTH - 1, SCREEN_TOP + 1);
