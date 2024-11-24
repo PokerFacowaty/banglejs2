@@ -11,8 +11,6 @@ const INTERVAL = 20; // How often should the main loop loop in ms
 const PADDLE_HEIGHT = 20;
 const PADDLE_WIDTH = 5;
 
-const DEBUG_COLOR = "#ff0000";
-
 class Block {
   // A generic movable object
 
