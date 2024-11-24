@@ -160,9 +160,9 @@ class Ball extends Block {
 
     if (Math.round(Math.random()) > 0) {
       // Above the clock box
-      y = getRandIntWithinBounds(SCREEN_TOP + 1, CLK_BOX.y - 10);
+      y = getRandIntWithinBounds(SCREEN_TOP + 1, CLK_BOX.y - BALL_SIZE - 1);
     } else {
-      y = getRandIntWithinBounds(CLK_BOX.y2 + 10, SCREEN_HEIGHT - 2);
+      y = getRandIntWithinBounds(CLK_BOX.y2 + BALL_SIZE + 1, SCREEN_HEIGHT - BALL_SIZE - 1);
     }
 
     if (whoScored === "R") {
