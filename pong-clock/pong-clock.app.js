@@ -265,6 +265,18 @@ g.setFontAlign(0, 0).setFont("7x11Numeric7Seg:4").drawString(timeStr, CLK_BOX.x 
   g.setFontAlign(0, 0).setFont("6x8", 2).drawString(dateStr, CLK_BOX.x + 70, CLK_BOX.y + 72, true);
 }
 
+function redrawEverySecUntil0() {
+  // I want to save battery by redrawing every minute, but on 0 seconds
+  const waitingInterval = setInterval(() => {
+    drawClock();
+    const date = new Date();
+    if (date.getSeconds() === 0) {
+      clearInterval(waitingInterval);
+      setInterval(drawClock, 60000);
+    }
+  }, 1000);
+}
+
 require("Font7x11Numeric7Seg").add(Graphics);
 g.clear();
 drawClock();
@@ -272,9 +284,8 @@ drawClock();
 g.drawRect(CLK_BOX.x, CLK_BOX.y, CLK_BOX.x2, CLK_BOX.y2);
 Bangle.loadWidgets();
 Bangle.drawWidgets();
-setInterval(drawClock, 1000);
 Bangle.setUI("clock");
-
 Bangle.on('lock', (lockedScreen) => {
   if (!pongPlaying && !lockedScreen) pong();
 });
+redrawEverySecUntil0();
