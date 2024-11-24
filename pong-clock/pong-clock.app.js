@@ -1,7 +1,8 @@
-// Regular consts
 const SCREEN_HEIGHT = g.getHeight();
 const SCREEN_WIDTH = g.getWidth();
-const SCREEN_TOP = 24; // widgets assumed at the top
+/* Widgets assumed at the top now, since I don't want to cut off 24px for the
+  * top AND the bottom of the screen. */
+const SCREEN_TOP = 24;
 const BALL_SIZE = 6; // hehehe
 const CLOCK_BOX_LOCATION = {x: 20, y: SCREEN_TOP + 30, x2: SCREEN_WIDTH - 20, y2: SCREEN_HEIGHT - 30};
 const GAMES_TO_BE_PLAYED = 5;
@@ -9,7 +10,6 @@ const INTERVAL = 20; // How often should the main loop loop in ms
 const PADDLE_HEIGHT = 20;
 const PADDLE_WIDTH = 5;
 
-// Debug consts
 const DEBUG_COLOR = "#ff0000";
 
 class Block {
@@ -36,7 +36,7 @@ class Block {
     g.clearRect(this.x, this.y, this.x2, this.y2);
   }
 
-  move(x, y) {
+  moveBy(x, y) {
     // Physically move the visible object on screen, not just change the values
     this.clear();
     this.x += x;
@@ -57,7 +57,7 @@ class Block {
       y = 0;
     }
 
-    this.move(x, y);
+    this.moveBy(x, y);
   }
 }
 
@@ -144,7 +144,7 @@ class Ball extends Block {
 
   moveUsingSpeed() {
     // this.moveWithinScreen(this.speedX, this.speedY);
-    this.move(this.speedX, this.speedY);
+    this.moveBy(this.speedX, this.speedY);
   }
 
   didScore() {
