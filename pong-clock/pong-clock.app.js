@@ -217,9 +217,10 @@ function getRandIntWithinBounds(min, max) {
 }
 
 
-
+let pongPlaying = false; // so that it doesn't start twice
 function pong(lockedScreen) {
   if (lockedScreen) return;
+  pongPlaying = true;
   Bangle.drawWidgets();
   g.reset();
   const clockBox = new Block(CLK_BOX.x, CLK_BOX.y, CLK_BOX.x2, CLK_BOX.y2, true);
@@ -235,6 +236,7 @@ function pong(lockedScreen) {
       ball.clear();
       rPaddle.clear();
       lPaddle.clear();
+      pongPlaying = false;
       return;
     }
     g.reset();
@@ -278,4 +280,4 @@ Bangle.drawWidgets();
 setInterval(drawClock, 1000);
 Bangle.setUI("clock");
 
-Bangle.on('lock', pong);
+Bangle.on('lock', (lockedScreen) => {if (!pongPlaying) pong(lockedScreen);});
