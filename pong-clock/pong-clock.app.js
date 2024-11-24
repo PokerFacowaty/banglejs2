@@ -21,6 +21,8 @@ class Block {
     this.y = y;
     this.x2 = x2;
     this.y2 = y2;
+    this.speedX = 0;
+    this.speedY = 0;
     // 'full', 'none', 'border only'
     visibility ? this.visibility = visibility : this.visibility = 'full';
     this.draw();
@@ -40,6 +42,10 @@ class Block {
     g.clearRect(this.x, this.y, this.x2, this.y2);
   }
 
+  move() {
+    this.moveBy(this.speedX, this.speedY);
+  }
+
   moveBy(x, y) {
     // Physically move the visible object on screen, not just change the values
     this.clear();
@@ -50,8 +56,10 @@ class Block {
     this.draw();
   }
 
-  moveWithinScreen(x, y) {
+  moveWithinScreen() {
     // Sets x or y to 0 if it would mean going beyond the screen
+    let x = this.speedX;
+    let y = this.speedY;
     if (((this.x + x) < 0) || (this.x2 + x) >= SCREEN_HEIGHT) x = 0;
 
     if (((this.y + y) < SCREEN_TOP + 1) || (this.y2 + y) >= SCREEN_HEIGHT) {
@@ -83,7 +91,6 @@ class Paddle extends Block {
 
   constructor (side) {
     this.movesLeft = 0;
-    this.direction = 0;
     let x, y, x2, y2;
 
     if (side === "L") {
@@ -103,7 +110,7 @@ class Paddle extends Block {
 
   moveOrDecide(ball) {
     if (this.movesLeft > 0) {
-      super.moveWithinScreen(0, this.direction);
+      this.moveWithinScreen();
       this.movesLeft--;
       return;
     }
@@ -116,11 +123,11 @@ class Paddle extends Block {
     const paddleMiddle = this.y + Math.round(PADDLE_HEIGHT / 2);
     if (ballMiddle > paddleMiddle) {
       // ball LOWER than paddle (y starts at 0, this can be counterintuitive)
-      this.direction = 1;
+      this.speedY = 1;
     } else if (ballMiddle < paddleMiddle) {
-      this.direction = -1;
+      this.speedY = -1;
     } else {
-      this.direction = 0;
+      this.speedY = 0;
       this.movesLeft = 0;
       return;
     }
@@ -137,10 +144,6 @@ class Ball extends Block {
   constructor() {
     super(-BALL_SIZE - 1, -BALL_SIZE - 1, -1, -1);
     this.resetToMiddle();
-  }
-
-  moveUsingSpeed() {
-    this.moveBy(this.speedX, this.speedY);
   }
 
   didScore() {
@@ -246,7 +249,7 @@ function pong() {
       if (ball.checkCollision(box)) { collidedWith = box; }
     }
 
-    ball.moveUsingSpeed();
+    ball.move();
 
     if (collidedWith) collidedWith.draw();
 
