@@ -179,32 +179,32 @@ class Ball extends Block {
     this.moveToLocation(x, y);
   }
 
-  handleCollisionNoCorners(box) {
-    if (this.speedY < 0 && (this.y === box.y2)) {
+  handleCollisionNoCorners(block) {
+    if (this.speedY < 0 && (this.y === block.y2)) {
       // ball was going up and hit something above
       this.speedY = 1;
-    } else if (this.speedY > 0 && (this.y2 === box.y)) {
+    } else if (this.speedY > 0 && (this.y2 === block.y)) {
       // ball was going down and hit something below
       this.speedY = -1;
-    } else if (this.speedX > 0 && (this.x2 === box.x)) {
+    } else if (this.speedX > 0 && (this.x2 === block.x)) {
       // ball was going right and hit something right
       this.speedX = -1;
-    } else if (this.speedX < 0 && (this.x === box.x2)) {
+    } else if (this.speedX < 0 && (this.x === block.x2)) {
       // ball was going left and hit something left
       this.speedX = 1;
     }
   }
 
-  checkCollision(box) {
+  checkCollision(block) {
     // Simple AABB 2D collision check
-    const ballIsToTheRight = this.x > box.x2;
-    const ballIsToTheLeft = this.x2 < box.x;
-    const ballIsAbove = this.y2 < box.y;
-    const ballIsBelow = this.y > box.y2;
+    const ballIsToTheRight = this.x > block.x2;
+    const ballIsToTheLeft = this.x2 < block.x;
+    const ballIsAbove = this.y2 < block.y;
+    const ballIsBelow = this.y > block.y2;
 
     if (!(ballIsToTheRight || ballIsToTheLeft || ballIsAbove || ballIsBelow)) {
-      this.handleCollisionNoCorners(box);
-      return box;
+      this.handleCollisionNoCorners(block);
+      return block;
     }
     return null;
   }
@@ -251,8 +251,8 @@ function pong() {
     }
 
     let collidedWith;
-    for (const box of [clockBox, rPaddle, lPaddle, topBox, botBox]) {
-      if (ball.checkCollision(box)) { collidedWith = box; }
+    for (const block of [clockBox, rPaddle, lPaddle, topBox, botBox]) {
+      if (ball.checkCollision(block)) { collidedWith = block; }
     }
 
     ball.move();
