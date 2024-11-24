@@ -150,7 +150,7 @@ class Ball extends Block {
 
   resetToMiddle(whoScored) {
     // After one of the paddles scores or at the beginning of the game
-    
+
     const clockBoxMiddle = Math.round(
       (CLK_BOX.x2 - CLK_BOX.y) / 2);
 
@@ -242,7 +242,7 @@ function pong() {
 
     let collidedWith;
     for (const box of [clockBox, rPaddle, lPaddle, topBox, botBox]) {
-      if (ball.checkCollision(box)) { collidedWith = box }
+      if (ball.checkCollision(box)) { collidedWith = box; }
     }
 
     ball.moveUsingSpeed();
