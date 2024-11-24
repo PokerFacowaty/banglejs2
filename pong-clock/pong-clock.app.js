@@ -220,8 +220,8 @@ function pong(lockedScreen) {
   const clockBox = new Block(CLK_BOX.x, CLK_BOX.y, CLK_BOX.x2, CLK_BOX.y2, 'border only');
   const rPaddle = new Paddle("R");
   const lPaddle = new Paddle("L");
-  const topBox = new Block(0, SCREEN_TOP + 1, SCREEN_WIDTH - 1, SCREEN_TOP + 1);
-  const botBox = new Block(0, SCREEN_HEIGHT - 1, SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
+  const topBox = new Block(0, SCREEN_TOP, SCREEN_WIDTH - 1, SCREEN_TOP, 'none');
+  const botBox = new Block(0, SCREEN_HEIGHT, SCREEN_WIDTH - 1, SCREEN_HEIGHT, 'none');
   const ball = new Ball();
   let scores = 0;
   const mainLoop = setInterval(() => {
