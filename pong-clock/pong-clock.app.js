@@ -36,6 +36,7 @@ class Block {
   }
 
   clear() {
+    if (this.visibility === 'none') return;
     g.clearRect(this.x, this.y, this.x2, this.y2);
   }
 
