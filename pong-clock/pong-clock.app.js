@@ -1,15 +1,15 @@
-const SCREEN_HEIGHT = g.getHeight();
-const SCREEN_WIDTH = g.getWidth();
+const SCREEN_H = g.getHeight();
+const SCREEN_W = g.getWidth();
 /* Widgets assumed at the top now, since I don't want to cut off 24px for the
   * top AND the bottom of the screen. */
 const SCREEN_TOP = 24;
 const BALL_SIZE = 6; // hehehe
 const CLK_BOX = {x: 20, y: SCREEN_TOP + 30,
-                 x2: SCREEN_WIDTH - 20, y2: SCREEN_HEIGHT - 30};
+                 x2: SCREEN_W - 20, y2: SCREEN_H - 30};
 const GAMES_TO_BE_PLAYED = 5;
 const INTERVAL = 20; // How often should the main loop loop in ms
-const PADDLE_HEIGHT = 20;
-const PADDLE_WIDTH = 5;
+const PADDLE_H = 20;
+const PADDLE_W = 5;
 
 class Block {
   // A generic movable object
@@ -58,9 +58,9 @@ class Block {
     // Sets x or y to 0 if it would mean going beyond the screen
     let x = this.speedX;
     let y = this.speedY;
-    if (((this.x + x) < 0) || (this.x2 + x) >= SCREEN_HEIGHT) x = 0;
+    if (((this.x + x) < 0) || (this.x2 + x) >= SCREEN_H) x = 0;
 
-    if (((this.y + y) < SCREEN_TOP + 1) || (this.y2 + y) >= SCREEN_HEIGHT) {
+    if (((this.y + y) < SCREEN_TOP + 1) || (this.y2 + y) >= SCREEN_H) {
                       // +1 because of the block below widgets, not ideal
       y = 0;
     }
@@ -93,14 +93,14 @@ class Paddle extends Block {
 
     if (side === "L") {
       x = 0;
-      y = Math.round((SCREEN_HEIGHT - PADDLE_HEIGHT) / 2);
-      x2 = PADDLE_WIDTH;
-      y2 = y + PADDLE_HEIGHT;
+      y = Math.round((SCREEN_H - PADDLE_H) / 2);
+      x2 = PADDLE_W;
+      y2 = y + PADDLE_H;
     } else {
-      x = SCREEN_WIDTH - PADDLE_WIDTH;
-      y = Math.round((SCREEN_HEIGHT - PADDLE_HEIGHT) / 2);
-      x2 = SCREEN_WIDTH - 1;
-      y2 = y + PADDLE_HEIGHT;
+      x = SCREEN_W - PADDLE_W;
+      y = Math.round((SCREEN_H - PADDLE_H) / 2);
+      x2 = SCREEN_W - 1;
+      y2 = y + PADDLE_H;
     }
 
     super(x, y, x2, y2);
@@ -118,7 +118,7 @@ class Paddle extends Block {
 
   assignDirectionAndMoves(ball) {
     const ballMiddle = ball.y + Math.round(BALL_SIZE / 2);
-    const paddleMiddle = this.y + Math.round(PADDLE_HEIGHT / 2);
+    const paddleMiddle = this.y + Math.round(PADDLE_H / 2);
     if (ballMiddle > paddleMiddle) {
       // ball LOWER than paddle (y starts at 0, this can be counterintuitive)
       this.speedY = 1;
@@ -145,7 +145,7 @@ class Ball extends Block {
 
   didScore() {
     if (this.x <= 0) return "R";
-    if (this.x2 >= SCREEN_WIDTH - 1) return "L";
+    if (this.x2 >= SCREEN_W - 1) return "L";
     return "";
   }
 
@@ -159,7 +159,7 @@ class Ball extends Block {
       y = getRandIntWithinBounds(SCREEN_TOP + 1, CLK_BOX.y - BALL_SIZE - 1);
     } else {
       y = getRandIntWithinBounds(CLK_BOX.y2 + BALL_SIZE + 1,
-                                 SCREEN_HEIGHT - BALL_SIZE - 1);
+                                 SCREEN_H - BALL_SIZE - 1);
     }
 
     if (whoScored === "R") {
@@ -222,10 +222,8 @@ function pong() {
                              CLK_BOX.y2, 'border only');
   const rPaddle = new Paddle("R");
   const lPaddle = new Paddle("L");
-  const topBox = new Block(0, SCREEN_TOP, SCREEN_WIDTH - 1,
-                           SCREEN_TOP, 'none');
-  const botBox = new Block(0, SCREEN_HEIGHT, SCREEN_WIDTH - 1,
-                           SCREEN_HEIGHT, 'none');
+  const topBox = new Block(0, SCREEN_TOP, SCREEN_W - 1, SCREEN_TOP, 'none');
+  const botBox = new Block(0, SCREEN_H, SCREEN_W - 1, SCREEN_H, 'none');
   const ball = new Ball();
   let scores = 0;
 
