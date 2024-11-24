@@ -139,7 +139,6 @@ class Ball extends Block {
   }
 
   moveUsingSpeed() {
-    // this.moveWithinScreen(this.speedX, this.speedY);
     this.moveBy(this.speedX, this.speedY);
   }
 
@@ -221,7 +220,6 @@ function getRandIntWithinBounds(min, max) {
 
 function pong(lockedScreen) {
   if (lockedScreen) return;
-  // g.clear();
   Bangle.drawWidgets();
   g.reset();
   const clockBox = new Block(CLK_BOX.x, CLK_BOX.y, CLK_BOX.x2, CLK_BOX.y2, true);
