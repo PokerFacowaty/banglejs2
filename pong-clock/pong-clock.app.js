@@ -58,6 +58,17 @@ class Block {
 
     this.moveBy(x, y);
   }
+
+  moveToLocation(x, y) {
+    const w = this.x2 - this.x;
+    const h = this.y2 - this.y;
+    this.clear();
+    this.x = x;
+    this.y = y;
+    this.x2 = x + w;
+    this.y2 = y + h;
+    this.draw();
+  }
 }
 
 class Paddle extends Block {
@@ -171,15 +182,6 @@ class Ball extends Block {
 
     this.speedY = Math.round(Math.random()) > 0 ? 1 : -1;
     this.moveToLocation(x, y);
-  }
-
-  moveToLocation(x, y) {
-    this.clear();
-    this.x = x;
-    this.y = y;
-    this.x2 = x + BALL_SIZE;
-    this.y2 = y + BALL_SIZE;
-    this.draw();
   }
 
   handleCollisionNoCorners(box) {
