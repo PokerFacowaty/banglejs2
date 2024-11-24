@@ -1,6 +1,6 @@
 // Regular consts
 const SCREEN_HEIGHT = g.getHeight();
-const SCREEN_WIDTH = g.getWidth(); // TODO: account for widget panel
+const SCREEN_WIDTH = g.getWidth();
 const SCREEN_TOP = 24; // widgets assumed at the top
 const BALL_SIZE = 6; // hehehe
 const CLOCK_BOX_LOCATION = {x: 20, y: SCREEN_TOP + 30, x2: SCREEN_WIDTH - 20, y2: SCREEN_HEIGHT - 30};
