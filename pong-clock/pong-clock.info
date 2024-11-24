@@ -1,0 +1,6 @@
+{
+    "id": "pong-clock",
+    "name": "Pong Clock",
+    "type": "clock",
+    "src": "pong-clock.app.js"
+}
