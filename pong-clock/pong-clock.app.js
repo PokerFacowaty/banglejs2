@@ -49,9 +49,7 @@ class Block {
 
   moveWithinScreen(x, y) {
     // Sets x or y to 0 if it would mean going beyond the screen
-    if (((this.x + x) < 0) || (this.x2 + x) >= SCREEN_HEIGHT) {
-      x = 0;
-    }
+    if (((this.x + x) < 0) || (this.x2 + x) >= SCREEN_HEIGHT) x = 0;
 
     if (((this.y + y) < SCREEN_TOP + 1) || (this.y2 + y) >= SCREEN_HEIGHT) {
                       // +1 because of the block below widgets, not ideal
@@ -146,14 +144,8 @@ class Ball extends Block {
   }
 
   didScore() {
-    if (this.x <= 0) {
-      return "R";
-    }
-
-    if (this.x2 >= SCREEN_WIDTH - 1) {
-      return "L";
-    }
-
+    if (this.x <= 0) return "R";
+    if (this.x2 >= SCREEN_WIDTH - 1) return "L";
     return "";
   }
 
@@ -262,9 +254,7 @@ function pong(lockedScreen) {
 
     ball.moveUsingSpeed();
 
-    if (collidedWith) {
-      collidedWith.draw();
-    }
+    if (collidedWith) collidedWith.draw();
 
     lPaddle.moveOrDecide(ball);
     rPaddle.moveOrDecide(ball);
