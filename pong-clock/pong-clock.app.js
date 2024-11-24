@@ -132,21 +132,8 @@ class Ball extends Block {
   /** A ball can move in four directions diagonally. **/
 
   constructor() {
-    /** This should only get called at the very start of the game, so it
-      * randomizes the ball's position and direction within reason **/
-
-    x = getRandIntWithinBounds(CLK_BOX.x + 25, CLK_BOX.x2 - 25);
-
-    if (Math.round(Math.random()) > 0) {
-      // Above the clock box
-      y = getRandIntWithinBounds(SCREEN_TOP + 1, CLK_BOX.y - 10);
-    } else {
-      y = getRandIntWithinBounds(CLK_BOX.y2 + 10, SCREEN_HEIGHT);
-    }
-
-    super(x, y, x + BALL_SIZE, y + BALL_SIZE);
-    this.speedX = Math.round(Math.random()) ? 1 : -1;
-    this.speedY = Math.round(Math.random()) ? 1 : -1;
+    super(-BALL_SIZE - 1, -BALL_SIZE - 1, -1, -1);
+    this.resetToMiddle();
   }
 
   moveUsingSpeed() {
@@ -160,7 +147,7 @@ class Ball extends Block {
   }
 
   resetToMiddle(whoScored) {
-    // After one of the paddles scores
+    // After one of the paddles scores or at the beginning of the game
     
     const clockBoxMiddle = Math.round(
       (CLK_BOX.x2 - CLK_BOX.y) / 2);
@@ -175,9 +162,12 @@ class Ball extends Block {
     if (whoScored === "R") {
       x = getRandIntWithinBounds(CLK_BOX.x2 - 25, clockBoxMiddle);
       this.speedX = -1;
-    } else {
+    } else if (whoScored === "L"){
       x = getRandIntWithinBounds(CLK_BOX.x + 25, clockBoxMiddle);
       this.speedX = 1;
+    } else {
+      x = getRandIntWithinBounds(CLK_BOX.x + 25, CLK_BOX.x2 - 25);
+      this.speedX = Math.round(Math.random()) > 0 ? 1 : -1;
     }
 
     this.speedY = Math.round(Math.random()) > 0 ? 1 : -1;
