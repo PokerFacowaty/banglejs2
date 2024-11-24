@@ -4,7 +4,8 @@ const SCREEN_WIDTH = g.getWidth();
   * top AND the bottom of the screen. */
 const SCREEN_TOP = 24;
 const BALL_SIZE = 6; // hehehe
-const CLK_BOX = {x: 20, y: SCREEN_TOP + 30, x2: SCREEN_WIDTH - 20, y2: SCREEN_HEIGHT - 30};
+const CLK_BOX = {x: 20, y: SCREEN_TOP + 30,
+                 x2: SCREEN_WIDTH - 20, y2: SCREEN_HEIGHT - 30};
 const GAMES_TO_BE_PLAYED = 5;
 const INTERVAL = 20; // How often should the main loop loop in ms
 const PADDLE_HEIGHT = 20;
