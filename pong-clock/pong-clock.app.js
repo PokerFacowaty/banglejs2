@@ -132,14 +132,13 @@ class Paddle extends Block {
       return;
     }
 
-    /** The bounds times INTERVAL give you for how long the paddles can be
+    /** The bounds times INTERVAL gives you for how long the paddles can be
       * moving. So between 3 and 50 gives you between 60 and 1000 ms **/
     this.movesLeft = getRandIntWithinBounds(3, 50);
   }
 }
 
 class Ball extends Block {
-  /** A ball can move in four directions diagonally. **/
 
   constructor() {
     super(-BALL_SIZE - 1, -BALL_SIZE - 1, -1, -1);
@@ -155,14 +154,14 @@ class Ball extends Block {
   resetToMiddle(whoScored) {
     // After one of the paddles scores or at the beginning of the game
 
-    const clockBoxMiddle = Math.round(
-      (CLK_BOX.x2 - CLK_BOX.y) / 2);
+    const clockBoxMiddle = Math.round((CLK_BOX.x2 - CLK_BOX.y) / 2);
 
+    // Randomize whether it's above or below the clock box
     if (Math.round(Math.random()) > 0) {
-      // Above the clock box
       y = getRandIntWithinBounds(SCREEN_TOP + 1, CLK_BOX.y - BALL_SIZE - 1);
     } else {
-      y = getRandIntWithinBounds(CLK_BOX.y2 + BALL_SIZE + 1, SCREEN_HEIGHT - BALL_SIZE - 1);
+      y = getRandIntWithinBounds(CLK_BOX.y2 + BALL_SIZE + 1,
+                                 SCREEN_HEIGHT - BALL_SIZE - 1);
     }
 
     if (whoScored === "R") {
@@ -197,6 +196,7 @@ class Ball extends Block {
   }
 
   checkCollision(box) {
+    // Simple AABB 2D collision check
     const ballIsToTheRight = this.x > box.x2;
     const ballIsToTheLeft = this.x2 < box.x;
     const ballIsAbove = this.y2 < box.y;
@@ -220,13 +220,17 @@ function pong() {
   pongPlaying = true;
   Bangle.drawWidgets();
   g.reset();
-  const clockBox = new Block(CLK_BOX.x, CLK_BOX.y, CLK_BOX.x2, CLK_BOX.y2, 'border only');
+  const clockBox = new Block(CLK_BOX.x, CLK_BOX.y, CLK_BOX.x2,
+                             CLK_BOX.y2, 'border only');
   const rPaddle = new Paddle("R");
   const lPaddle = new Paddle("L");
-  const topBox = new Block(0, SCREEN_TOP, SCREEN_WIDTH - 1, SCREEN_TOP, 'none');
-  const botBox = new Block(0, SCREEN_HEIGHT, SCREEN_WIDTH - 1, SCREEN_HEIGHT, 'none');
+  const topBox = new Block(0, SCREEN_TOP, SCREEN_WIDTH - 1,
+                           SCREEN_TOP, 'none');
+  const botBox = new Block(0, SCREEN_HEIGHT, SCREEN_WIDTH - 1,
+                           SCREEN_HEIGHT, 'none');
   const ball = new Ball();
   let scores = 0;
+
   const mainLoop = setInterval(() => {
     if (scores > GAMES_TO_BE_PLAYED) {
       clearInterval(mainLoop);
@@ -236,7 +240,9 @@ function pong() {
       pongPlaying = false;
       return;
     }
+
     g.reset();
+
     const whoScored = ball.didScore();
     if (whoScored) {
       scores++;
@@ -251,6 +257,7 @@ function pong() {
 
     ball.move();
 
+    // This is in case clear() on the ball removed a part of the block
     if (collidedWith) collidedWith.draw();
 
     lPaddle.moveOrDecide(ball);
@@ -265,12 +272,14 @@ function drawClock() {
   const dateStr = require("locale").date(date, 0).toUpperCase() + "\n" +
                   require("locale").dow(date, 0).toUpperCase();
 
-g.setFontAlign(0, 0).setFont("7x11Numeric7Seg:4").drawString(timeStr, CLK_BOX.x + 70, CLK_BOX.y + 30, true /* Clear background */);
-  g.setFontAlign(0, 0).setFont("6x8", 2).drawString(dateStr, CLK_BOX.x + 70, CLK_BOX.y + 72, true);
+  g.setFontAlign(0, 0).setFont("7x11Numeric7Seg:4")
+    .drawString(timeStr, CLK_BOX.x + 70, CLK_BOX.y + 30, true);
+  g.setFont("6x8", 2)
+    .drawString(dateStr, CLK_BOX.x + 70, CLK_BOX.y + 72, true);
 }
 
 function redrawEverySecUntil0() {
-  // I want to save battery by redrawing every minute, but on 0 seconds
+  // I want to save battery by redrawing every minute, starting on 0 seconds
   const waitingInterval = setInterval(() => {
     drawClock();
     const date = new Date();
