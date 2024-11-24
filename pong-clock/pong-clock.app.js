@@ -4,7 +4,7 @@ const SCREEN_WIDTH = g.getWidth();
   * top AND the bottom of the screen. */
 const SCREEN_TOP = 24;
 const BALL_SIZE = 6; // hehehe
-const CLOCK_BOX_LOCATION = {x: 20, y: SCREEN_TOP + 30, x2: SCREEN_WIDTH - 20, y2: SCREEN_HEIGHT - 30};
+const CLK_BOX = {x: 20, y: SCREEN_TOP + 30, x2: SCREEN_WIDTH - 20, y2: SCREEN_HEIGHT - 30};
 const GAMES_TO_BE_PLAYED = 5;
 const INTERVAL = 20; // How often should the main loop loop in ms
 const PADDLE_HEIGHT = 20;
@@ -125,16 +125,13 @@ class Ball extends Block {
     /** This should only get called at the very start of the game, so it
       * randomizes the ball's position and direction within reason **/
 
-    x = getRandIntWithinBounds(
-      CLOCK_BOX_LOCATION.x + 25, CLOCK_BOX_LOCATION.x2 - 25);
+    x = getRandIntWithinBounds(CLK_BOX.x + 25, CLK_BOX.x2 - 25);
 
     if (Math.round(Math.random()) > 0) {
       // Above the clock box
-      y = getRandIntWithinBounds(
-        SCREEN_TOP + 1, CLOCK_BOX_LOCATION.y - 10
-      );   
+      y = getRandIntWithinBounds(SCREEN_TOP + 1, CLK_BOX.y - 10);
     } else {
-      y = getRandIntWithinBounds(CLOCK_BOX_LOCATION.y2 + 10, SCREEN_HEIGHT);
+      y = getRandIntWithinBounds(CLK_BOX.y2 + 10, SCREEN_HEIGHT);
     }
 
     super(x, y, x + BALL_SIZE, y + BALL_SIZE);
@@ -163,20 +160,20 @@ class Ball extends Block {
     // After one of the paddles scores
     
     const clockBoxMiddle = Math.round(
-      (CLOCK_BOX_LOCATION.x2 - CLOCK_BOX_LOCATION.y) / 2);
+      (CLK_BOX.x2 - CLK_BOX.y) / 2);
 
     if (Math.round(Math.random()) > 0) {
       // Above the clock box
-      y = getRandIntWithinBounds(SCREEN_TOP + 1, CLOCK_BOX_LOCATION.y - 10);
+      y = getRandIntWithinBounds(SCREEN_TOP + 1, CLK_BOX.y - 10);
     } else {
-      y = getRandIntWithinBounds(CLOCK_BOX_LOCATION.y2 + 10, SCREEN_HEIGHT - 2);
+      y = getRandIntWithinBounds(CLK_BOX.y2 + 10, SCREEN_HEIGHT - 2);
     }
 
     if (whoScored === "R") {
-      x = getRandIntWithinBounds(CLOCK_BOX_LOCATION.x2 - 25, clockBoxMiddle);
+      x = getRandIntWithinBounds(CLK_BOX.x2 - 25, clockBoxMiddle);
       this.speedX = -1;
     } else {
-      x = getRandIntWithinBounds(CLOCK_BOX_LOCATION.x + 25, clockBoxMiddle);
+      x = getRandIntWithinBounds(CLK_BOX.x + 25, clockBoxMiddle);
       this.speedX = 1;
     }
 
@@ -234,7 +231,7 @@ function pong(lockedScreen) {
   // g.clear();
   Bangle.drawWidgets();
   g.reset();
-  const clockBox = new Block(CLOCK_BOX_LOCATION.x, CLOCK_BOX_LOCATION.y, CLOCK_BOX_LOCATION.x2, CLOCK_BOX_LOCATION.y2, true);
+  const clockBox = new Block(CLK_BOX.x, CLK_BOX.y, CLK_BOX.x2, CLK_BOX.y2, true);
   const rPaddle = new Paddle("R");
   const lPaddle = new Paddle("L");
   const topBox = new Block(0, SCREEN_TOP + 1, SCREEN_WIDTH - 1, SCREEN_TOP + 1);
@@ -280,8 +277,8 @@ function drawClock() {
   const dateStr = require("locale").date(date, 0).toUpperCase() + "\n" +
                   require("locale").dow(date, 0).toUpperCase();
 
-g.setFontAlign(0, 0).setFont("7x11Numeric7Seg:4").drawString(timeStr, CLOCK_BOX_LOCATION.x + 70, CLOCK_BOX_LOCATION.y + 30, true /* Clear background */);
-  g.setFontAlign(0, 0).setFont("6x8", 2).drawString(dateStr, CLOCK_BOX_LOCATION.x + 70, CLOCK_BOX_LOCATION.y + 72, true);
+g.setFontAlign(0, 0).setFont("7x11Numeric7Seg:4").drawString(timeStr, CLK_BOX.x + 70, CLK_BOX.y + 30, true /* Clear background */);
+  g.setFontAlign(0, 0).setFont("6x8", 2).drawString(dateStr, CLK_BOX.x + 70, CLK_BOX.y + 72, true);
 }
 
 require("Font7x11Numeric7Seg").add(Graphics);
